@@ -1,0 +1,133 @@
+.home-page-wrapper {
+  min-height: 100vh;
+}
+
+.hero-section {
+  background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+  color: white;
+  padding: 4rem 0;
+  border-radius: 0 0 2rem 2rem;
+  margin-top: -1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.search-form {
+  max-width: 600px;
+}
+
+.input-group {
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.form-control-lg {
+  border: none;
+  padding: 1rem 1.5rem;
+}
+
+.form-control-lg:focus {
+  box-shadow: none;
+}
+
+.btn-lg {
+  padding: 1rem 1.5rem;
+}
+
+.section-header {
+  margin-bottom: 2rem;
+}
+
+.section-icon {
+  font-size: 2rem;
+  color: #4361ee;
+}
+
+/* Job cards styling */
+/* Add these styles to your existing CSS */
+
+.job-meta-info {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.job-meta-item {
+  display: flex;
+  align-items: center;
+  background-color: rgba(67, 97, 238, 0.08);
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #4361ee;
+}
+
+.job-meta-icon {
+  margin-right: 0.5rem;
+  font-size: 0.85rem;
+}
+
+/* Make sure these existing styles are in your CSS */
+.job-card {
+  height: 100%;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: none;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+.job-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12);
+}
+
+.job-card .card-body {
+  padding: 1.75rem;
+}
+
+.job-card .card-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #3a0ca3;
+}
+
+.job-card .job-field {
+  display: inline-block;
+  background: rgba(67, 97, 238, 0.1);
+  color: #4361ee;
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.job-card .job-description {
+  color: #6c757d;
+  margin-bottom: 1.5rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.job-card .btn {
+  width: 100%;
+  padding: 0.75rem;
+  font-weight: 600;
+  border-radius: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 3rem 0;
+  }
+  
+  .search-form {
+    width: 90%;
+  }
+}
