@@ -1,0 +1,121 @@
+.auth-page {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+.auth-header {
+  background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+  color: white;
+  padding: 3rem 0;
+  margin-bottom: -3rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.login-container {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 2.5rem;
+  background-color: white;
+  border-radius: 1rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  margin-top: 3rem;
+  margin-bottom: 3rem;
+}
+
+.auth-form-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.auth-icon {
+  font-size: 3rem;
+  color: #4361ee;
+  margin-bottom: 1rem;
+}
+
+.auth-form-header h2 {
+  font-weight: 700;
+  color: #212529;
+  margin-bottom: 0.5rem;
+}
+
+.auth-subtitle {
+  color: #6c757d;
+  margin-bottom: 1.5rem;
+}
+
+.auth-form {
+  margin-top: 1.5rem;
+}
+
+.input-icon-wrapper {
+  position: relative;
+}
+
+.input-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d;
+}
+
+.auth-input {
+  padding-left: 3rem !important;
+  height: 3.25rem;
+  border-radius: 0.5rem;
+  border: 1px solid #ced4da;
+  transition: all 0.3s ease;
+}
+
+.auth-input:focus {
+  box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+  border-color: #4361ee;
+}
+
+.auth-button {
+  width: 100%;
+  padding: 0.75rem;
+  font-weight: 600;
+  border-radius: 0.5rem;
+  background: linear-gradient(90deg, #4361ee 0%, #3a0ca3 100%);
+  border: none;
+  transition: all 0.3s ease;
+  height: 3.25rem;
+}
+
+.auth-button:hover:not(:disabled) {
+  background: linear-gradient(90deg, #3a0ca3 0%, #4361ee 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+}
+
+.auth-footer {
+  text-align: center;
+  margin-top: 1.5rem;
+  color: #6c757d;
+}
+
+.auth-link {
+  color: #4361ee;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.auth-link:hover {
+  color: #3a0ca3;
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .login-container {
+    width: 90%;
+    padding: 2rem;
+    margin-top: 2rem;
+  }
+  
+  .auth-header {
+    padding: 2rem 0;
+  }
+}

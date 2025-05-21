@@ -1,0 +1,12 @@
+@import './Login.css';
+
+.register-container {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 2.5rem;
+  background-color: white;
+  border-radius: 1rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  margin-top: 3rem;
+  margin-bottom: 3rem;
+}

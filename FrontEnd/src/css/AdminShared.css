@@ -1,0 +1,250 @@
+.admin-page {
+  min-height: 100vh;
+  
+  background-color: #f8f9fa;
+}
+
+.admin-header {
+  background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+  color: white;
+  padding: 3rem 0;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.header-icon {
+  margin-right: 0.75rem;
+  font-size: 1.75rem;
+  vertical-align: middle;
+}
+
+.admin-card {
+  background-color: white;
+  border-radius: 1rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  padding: 2rem;
+  width: 100%;
+  max-width: 100%;
+  margin-bottom: 2rem;
+}
+
+.admin-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.admin-title {
+  font-weight: 700;
+  color: #3a0ca3;
+  margin: 0;
+}
+
+.admin-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.admin-alert {
+  margin: 0;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+}
+
+.admin-alert-success {
+  background-color: #d1fae5;
+  color: #065f46;
+  border: none;
+}
+
+.admin-alert-danger {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  border: none;
+}
+
+.admin-btn-add {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+}
+
+/* Add or update these styles in your AdminShared.css file */
+
+.admin-table-container {
+  width: 100%;
+  overflow-x: auto;
+  
+  margin-bottom: 1.5rem;
+}
+
+.admin-table {
+    width: 100%;
+    min-width: 1500px; /* or whatever minimum width makes sense for your columns */
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: auto;
+  }
+  
+
+.admin-table th,
+.admin-table td {
+  padding: 1rem;
+  vertical-align: middle;
+  border: 1px solid #e2e8f0;
+}
+
+.admin-table th {
+  background-color: #f8fafc;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.admin-table td {
+  text-align: center;
+}
+
+/* Make sure the container has proper width */
+.admin-card {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto; /* allow scrolling if needed */
+    padding: 2rem;
+    background-color: white;
+    border-radius: 1rem;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    margin-bottom: 2rem;
+  }
+  
+
+/* Ensure the description column doesn't take too much space */
+.description-cell {
+  max-width: 300px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Make the actions column have a fixed width */
+.actions-cell {
+  min-width: 150px;
+  white-space: nowrap;
+}
+
+.admin-table thead {
+  background-color: #4361ee;
+  color: white;
+}
+
+.admin-table th {
+  padding: 1rem !important;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  border: none !important;
+}
+
+.admin-table td {
+  padding: 1rem !important;
+  vertical-align: middle !important;
+  border-color: #f1f1f1 !important;
+}
+
+.admin-table tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+.admin-table tr:hover {
+  background-color: #f0f4ff;
+}
+
+.description-cell {
+  max-width: 250px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.actions-cell {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.action-btn:hover {
+  transform: translateY(-3px);
+}
+
+.status-badge, .type-badge {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  border-radius: 2rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.status-active {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.status-inactive {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.type-admin {
+  background-color: #e0f2fe;
+  color: #0369a1;
+}
+
+.type-user {
+  background-color: #f3e8ff;
+  color: #6b21a8;
+}
+
+@media (max-width: 768px) {
+  .admin-header {
+    padding: 2rem 0;
+  }
+  
+  .admin-card {
+    padding: 1.5rem;
+  }
+  
+  .admin-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .admin-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .action-btn {
+    width: 32px;
+    height: 32px;
+  }
+}
