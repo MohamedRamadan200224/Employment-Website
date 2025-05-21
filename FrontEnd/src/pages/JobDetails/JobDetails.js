@@ -102,7 +102,10 @@ const JobDetails = () => {
         if (useMockData) {
             // Use mock data in development mode
             setTimeout(() => {
-                const mockJob = sampleJobDetails[id];
+                // Convert id to number since URL params are strings
+                const jobId = parseInt(id);
+                const mockJob = sampleJobDetails[jobId];
+                
                 if (mockJob) {
                     setJob({ ...job, result: mockJob, loading: false, err: null });
                 } else {
