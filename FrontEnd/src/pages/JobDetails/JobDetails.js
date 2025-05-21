@@ -77,7 +77,7 @@ const sampleJobDetails = {
 };
 
 // Check if we should use mock data
-const useMockData = process.env.NODE_ENV === 'development';
+const useMockData = process.env.REACT_APP_ENV === 'development';
 const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3306';
 
 const JobDetails = () => {
