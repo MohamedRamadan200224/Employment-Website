@@ -1,0 +1,28 @@
+{
+  "name": "iaproject",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index",
+    "build": "node index"
+  },
+  "author": "mohamed",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.1.0",
+    "cors": "^2.8.5",
+    "crypto-js": "^4.1.1",
+    "dotenv": "^16.5.0",
+    "express": "^4.18.2",
+    "express-validator": "^6.15.0",
+    "iaproject": "file:",
+    "multer": "^1.4.5-lts.1",
+    "mysql": "^2.18.1",
+    "mysql2": "^3.14.1",
+    "nodemon": "^3.1.10"
+  },
+  "devDependencies": {
+    "disable-react-error-overlay": "^0.0.1"
+  }
+}
