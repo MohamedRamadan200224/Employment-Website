@@ -11,7 +11,7 @@ A simple job applying platform for specific company built with modern web techno
 ### 👨‍💻 For Job Seekers
 | Feature | Description |
 |---------|-------------|
-| **Profile Builder** | Create detailed professional profiles |
+| **Introduce Yourself** | Apply by writing detailed professional profiles in vacancies |
 | **Job Search** | Browse and filter available positions |
 | **One-Click Apply** | Submit applications effortlessly |
 
