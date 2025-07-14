@@ -4,7 +4,7 @@
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/MohamedRamadan200224/company-employment-website/pulls)
 
-A dynamic job portal platform built with modern web technologies to connect employers with top talent.
+A simple job applying platform for specific company built with modern web technologies to connect employers with top talent candidates.
 
 ## ✨ Key Features
 
