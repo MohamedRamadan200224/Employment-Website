@@ -52,8 +52,9 @@ A simple job applying platform for specific company built with modern web techno
 - MySQL 8.0+
 - npm or yarn
 
+### Don't Forget to Import the SQL DB from the iaproject (1).sql file
+
 ### Installation
-```bash
 
 # Install frontend dependencies
 cd FrontEnd && npm install
