@@ -23,19 +23,19 @@ const ManageJobs = () => {
   });
 
   useEffect(() => {
-    setJobs({ ...jobs, loading: true });
+    setJobs((prev) => ({ ...prev, loading: true }));
     axios
       .get(apiUrl + "/jobs?limit=50")
       .then((resp) => {
         console.log(resp);
-        setJobs({ ...jobs, results: resp.data.data || [], loading: false, err: null });
+        setJobs((prev) => ({ ...prev, results: resp.data.data || [], loading: false, err: null }));
       })
       .catch((err) => {
-        setJobs({
-          ...jobs,
+        setJobs((prev) => ({
+          ...prev,
           loading: false,
           err: " something went wrong, please try again later ! ",
-        });
+        }));
       });
   }, [jobs.reload]);
 
