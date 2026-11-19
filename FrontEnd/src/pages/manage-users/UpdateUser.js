@@ -39,24 +39,24 @@ const UpdateUser = () => {
       })
       .then((resp) => {
         const userData = resp.data;
-        setUpdateUser({
-          ...updateuser,
+        setUpdateUser((prev) => ({
+          ...prev,
           name: userData.name || "",
           email: userData.email || "",
           phone: userData.phone || "",
           type: userData.type || "",
           status: userData.status || "",
           fetchLoading: false,
-        });
+        }));
       })
       .catch((error) => {
-        setUpdateUser({
-          ...updateuser,
+        setUpdateUser((prev) => ({
+          ...prev,
           fetchLoading: false,
           err: "Failed to load user data",
-        });
+        }));
       });
-  }, [id]);
+  }, [id, auth.token]);
 
   const UpdateFun = (id) => {
     setUpdateUser({ ...updateuser, loading: true, err: [] });

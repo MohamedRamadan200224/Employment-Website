@@ -36,8 +36,8 @@ const UpdateJob = () => {
       .get(`${apiUrl}/jobs/${id}`)
       .then((resp) => {
         const jobData = resp.data;
-        setUpdateJob({
-          ...updatejob,
+        setUpdateJob((prev) => ({
+          ...prev,
           position: jobData.position || "",
           field: jobData.field || "",
           description: jobData.description || "",
@@ -45,14 +45,14 @@ const UpdateJob = () => {
           qualifications: jobData.qualifications || "",
           maxcandidate: jobData.maxcandidate || "",
           fetchLoading: false,
-        });
+        }));
       })
       .catch((error) => {
-        setUpdateJob({
-          ...updatejob,
+        setUpdateJob((prev) => ({
+          ...prev,
           fetchLoading: false,
           err: "Failed to load job data",
-        });
+        }));
       });
   }, [id]);
 

@@ -24,7 +24,7 @@ const ManageUsers = () => {
   });
 
   useEffect(() => {
-    setUsers({ ...users, loading: true });
+    setUsers((prev) => ({ ...prev, loading: true }));
     axios
       .get(apiUrl + "/users?limit=50", {
         headers: {
@@ -33,16 +33,16 @@ const ManageUsers = () => {
       })
       .then((resp) => {
         console.log(resp);
-        setUsers({ ...users, results: resp.data.data || [], loading: false, err: null });
+        setUsers((prev) => ({ ...prev, results: resp.data.data || [], loading: false, err: null }));
       })
       .catch((err) => {
-        setUsers({
-          ...users,
+        setUsers((prev) => ({
+          ...prev,
           loading: false,
           err: " something went wrong, please try again later ! ",
-        });
+        }));
       });
-  }, [users.reload]);
+  }, [users.reload, auth.token]);
 
   const deleteUser = (id) => {
     axios
