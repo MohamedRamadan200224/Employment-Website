@@ -8,6 +8,9 @@ import Container from 'react-bootstrap/Container';
 import { FaClipboardCheck, FaFileAlt } from "react-icons/fa";
 import "./RequestDetails.css";
 
+// API base URL from env (REACT_APP_API_URL); default is the local dev backend.
+const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:3306";
+
 const RequestDetails = () => {
   let { id } = useParams();
   const auth = getAuthUser();
@@ -22,7 +25,7 @@ const RequestDetails = () => {
   useEffect(() => {
     setRequest((prev) => ({ ...prev, loading: true }));
     axios
-      .get("http://localhost:3306/requests-review/" + id, {
+      .get(apiUrl + "/requests-review/" + id, {
         headers: {
           token: auth.token,
         }

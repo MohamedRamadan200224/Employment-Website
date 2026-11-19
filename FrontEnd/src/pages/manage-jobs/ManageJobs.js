@@ -9,6 +9,9 @@ import Spinner from "react-bootstrap/Spinner";
 import { FaBriefcase, FaPlus, FaEye, FaEdit, FaTrash } from "react-icons/fa";
 import "./ManageJobs.css";
 
+// API base URL from env (REACT_APP_API_URL); default is the local dev backend.
+const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:3306";
+
 let deletenum = 0;
 const ManageJobs = () => {
   const auth = getAuthUser();
@@ -26,7 +29,7 @@ const ManageJobs = () => {
       // { data, total, page, limit } — unwrap resp.data.data. limit=50
       // is the server cap, so the table keeps showing every job the
       // way the old unbounded list did (no pager on this page).
-      .get("http://localhost:3306/jobs?limit=50")
+      .get(apiUrl + "/jobs?limit=50")
       .then((resp) => {
         console.log(resp);
         setJobs((prev) => ({ ...prev, results: resp.data.data || [], loading: false, err: null }));
@@ -42,7 +45,7 @@ const ManageJobs = () => {
 
   const deleteJob = (id) => {
     axios
-      .delete("http://localhost:3306/jobs/" + id, {
+      .delete(apiUrl + "/jobs/" + id, {
         headers: {
           token: auth.token,
         },

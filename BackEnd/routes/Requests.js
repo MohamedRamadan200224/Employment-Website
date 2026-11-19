@@ -6,6 +6,7 @@ const { validationResult, body } = require('express-validator');
 const upload = require('../middleware/uploadimages');
 const util= require('util');
 const { parsePagination, paginatedResponse } = require("../utils/pagination");
+const { handleServerError } = require("../utils/errorHandler");
 
 
 //listing all applications to admin
@@ -42,7 +43,7 @@ router.get("",admin, async (req, res)=>{
      res.status(200).json(paginatedResponse(requestrev, total, { page, limit }));
 
  }catch (e) {
-     res.status(500).json(e);
+     return handleServerError(res, e);
  }
  });
 
@@ -81,7 +82,7 @@ router.put("/:id",admin,body("applicationreview").isString().withMessage("please
      res.status(200).json(requestrev);
 
  }catch (e) {
-     res.status(500).json(e);
+     return handleServerError(res, e);
  }
  });
 
@@ -102,7 +103,7 @@ router.put("/:id",admin,body("applicationreview").isString().withMessage("please
      res.status(200).json(requestrev);
 
  }catch (e) {
-     res.status(500).json(e);
+     return handleServerError(res, e);
  }
  });
 

@@ -6,6 +6,9 @@ import "../../css/Register.css";
 import axios from "axios";
 import { getAuthUser } from "../../helper/Storage";
 
+// API base URL from env (REACT_APP_API_URL); default is the local dev backend.
+const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:3306";
+
 let addnum=0;
 
 const AddJob=()=>{
@@ -26,7 +29,7 @@ const AddJob=()=>{
     e.preventDefault();
     setAddJob({ ...addjob, loading: true, err: [] });
     axios
-      .post("http://localhost:3306/jobs",{
+      .post(apiUrl + "/jobs",{
         position: addjob.position,
         field: addjob.field,
         description: addjob.description,

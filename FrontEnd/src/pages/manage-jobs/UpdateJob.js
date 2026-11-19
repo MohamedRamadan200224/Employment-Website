@@ -9,6 +9,9 @@ import { getAuthUser } from "../../helper/Storage";
 import { useParams } from "react-router-dom";
 import "./UpdateJob.css";
 
+// API base URL from env (REACT_APP_API_URL); default is the local dev backend.
+const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:3306";
+
 let updatenum = 0;
 
 const UpdateJob = () => {
@@ -30,7 +33,7 @@ const UpdateJob = () => {
   // Fetch job data when component mounts
   useEffect(() => {
     axios
-      .get(`http://localhost:3306/jobs/${id}`)
+      .get(`${apiUrl}/jobs/${id}`)
       .then((resp) => {
         const jobData = resp.data;
         setUpdateJob((prev) => ({
@@ -56,7 +59,7 @@ const UpdateJob = () => {
   const UpdateFun = (id) => {
     setUpdateJob({ ...updatejob, loading: true, err: [] });
     axios
-      .put("http://localhost:3306/jobs/"+id, {
+      .put(apiUrl + "/jobs/"+id, {
         position: updatejob.position,
         field: updatejob.field,
         description: updatejob.description,
