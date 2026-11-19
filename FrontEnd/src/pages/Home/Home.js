@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import JobsCard from "../../components/JobsCard";
 import Form from "react-bootstrap/Form";
 import axios from "axios";
@@ -96,39 +96,57 @@ const Home = () => {
 
   const [search, setSearch] = useState("");
 
+  // The fetch effect below reads the search box but must NOT re-run
+  // on every keystroke — search applies only when the form is
+  // submitted (which bumps jobs.reload). A ref keeps the current
+  // search value available to the effect without making it a
+  // dependency.
+  const searchRef = useRef("");
+
+  // Keep the ref in sync after every render, before the fetch
+  // effect below runs on the same commit.
   useEffect(() => {
-    setJobs({ ...jobs, loading: true });
+    searchRef.current = search;
+  });
+
+  useEffect(() => {
+    setJobs((prev) => ({ ...prev, loading: true }));
     
     if (useMockData) {
       // Use sample data when REACT_APP_USE_MOCK_DATA is true
       setTimeout(() => {
+        const query = searchRef.current;
         let filteredJobs = sampleJobs;
-        if (search) {
+        if (query) {
           filteredJobs = sampleJobs.filter(job => 
-            job.position.toLowerCase().includes(search.toLowerCase()) ||
-            job.field.toLowerCase().includes(search.toLowerCase()) ||
-            job.description.toLowerCase().includes(search.toLowerCase())
+            job.position.toLowerCase().includes(query.toLowerCase()) ||
+            job.field.toLowerCase().includes(query.toLowerCase()) ||
+            job.description.toLowerCase().includes(query.toLowerCase())
           );
         }
-        setJobs({ ...jobs, results: filteredJobs, loading: false, err: null });
+        setJobs((prev) => ({ ...prev, results: filteredJobs, loading: false, err: null }));
       }, 500); // Simulate network delay
     } else {
       // Use real API when REACT_APP_USE_MOCK_DATA is false
       axios
         .get(`${apiUrl}/jobs`, {
           params: {
-            search: search,
+            search: searchRef.current,
           },
         })
         .then((resp) => {
-          setJobs({ ...jobs, results: resp.data, loading: false, err: null });
+          // Perf P0: the real API now returns the paginated envelope
+          // { data, total, page, limit } — unwrap resp.data.data. The
+          // mock-data branch above still returns a plain array and is
+          // untouched.
+          setJobs((prev) => ({ ...prev, results: resp.data.data || [], loading: false, err: null }));
         })
         .catch((err) => {
-          setJobs({
-            ...jobs,
+          setJobs((prev) => ({
+            ...prev,
             loading: false,
             err: "Something went wrong, please try again later!",
-          });
+          }));
         });
     }
   }, [jobs.reload]);
@@ -213,3 +231,4 @@ const Home = () => {
 };
 
 export default Home;
+
