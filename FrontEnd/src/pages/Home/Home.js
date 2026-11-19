@@ -121,7 +121,11 @@ const Home = () => {
           },
         })
         .then((resp) => {
-          setJobs({ ...jobs, results: resp.data, loading: false, err: null });
+          // Perf P0: the real API now returns the paginated envelope
+          // { data, total, page, limit } — unwrap resp.data.data. The
+          // mock-data branch above still returns a plain array and is
+          // untouched.
+          setJobs({ ...jobs, results: resp.data.data || [], loading: false, err: null });
         })
         .catch((err) => {
           setJobs({
@@ -213,3 +217,4 @@ const Home = () => {
 };
 
 export default Home;
+
