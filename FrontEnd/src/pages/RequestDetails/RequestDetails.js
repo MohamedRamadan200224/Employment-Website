@@ -20,7 +20,7 @@ const RequestDetails = () => {
   });
 
   useEffect(() => {
-    setRequest({ ...request, loading: true });
+    setRequest((prev) => ({ ...prev, loading: true }));
     axios
       .get("http://localhost:3306/requests-review/" + id, {
         headers: {
@@ -28,17 +28,17 @@ const RequestDetails = () => {
         }
       })
       .then((resp) => {
-        setRequest({ ...request, description: resp.data[0].description, result: resp.data[0], loading: false, err: null });
+        setRequest((prev) => ({ ...prev, description: resp.data[0].description, result: resp.data[0], loading: false, err: null }));
         console.log(resp.data);
       })
       .catch((err) => {
-        setRequest({
-          ...request,
+        setRequest((prev) => ({
+          ...prev,
           loading: false,
           err: "Something went wrong, please try again later!",
-        });
+        }));
       });
-  }, []);
+  }, [id, auth.token]);
 
   return (
     <div className="admin-page">

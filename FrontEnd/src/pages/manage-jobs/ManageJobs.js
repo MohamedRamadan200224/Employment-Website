@@ -20,19 +20,23 @@ const ManageJobs = () => {
   });
 
   useEffect(() => {
-    setJobs({ ...jobs, loading: true });
+    setJobs((prev) => ({ ...prev, loading: true }));
     axios
-      .get("http://localhost:3306/jobs")
+      // Perf P0: the list endpoint now returns the paginated envelope
+      // { data, total, page, limit } — unwrap resp.data.data. limit=50
+      // is the server cap, so the table keeps showing every job the
+      // way the old unbounded list did (no pager on this page).
+      .get("http://localhost:3306/jobs?limit=50")
       .then((resp) => {
         console.log(resp);
-        setJobs({ ...jobs, results: resp.data, loading: false, err: null });
+        setJobs((prev) => ({ ...prev, results: resp.data.data || [], loading: false, err: null }));
       })
       .catch((err) => {
-        setJobs({
-          ...jobs,
+        setJobs((prev) => ({
+          ...prev,
           loading: false,
           err: " something went wrong, please try again later ! ",
-        });
+        }));
       });
   }, [jobs.reload]);
 

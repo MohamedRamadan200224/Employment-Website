@@ -5,94 +5,52 @@ import axios from "axios";
 import { getAuthUser } from "../../helper/Storage";
 import Spinner from "react-bootstrap/Spinner";
 import Alert from "react-bootstrap/Alert";
-import Container from 'react-bootstrap/Container';
-import { FaClipboardList, FaCheck, FaTimes, FaEye } from "react-icons/fa";
+import { FaClipboardList } from "react-icons/fa";
 import "./ManageRequests.css";
 
 const ManageRequests = () => {
   let reqnum = 0;
   const auth = getAuthUser();
   const navigate = useNavigate();
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 20;
   const [requests, setRequests] = useState({
     applicationreview: '',
     loading: true,
     results: [],
+    total: 0,
     err: null,
     reload: 0,
   });
 
+  // Perf P0: one fetch only. The old code fetched /requests-review,
+  // /jobs AND /users (all unbounded) and joined them in the browser —
+  // for each request row it mapped over ALL jobs and ALL users
+  // (O(requests x (jobs + users)) on every render). The list endpoint
+  // now returns one server-side JOIN per page, with the applicant name
+  // / email / phone and the job title already on each row, plus a
+  // total for pagination: { data, total, page, limit }.
   useEffect(() => {
-    setRequests({ ...requests, loading: true });
+    setRequests((prev) => ({ ...prev, loading: true }));
     axios
-      .get("http://localhost:3306/requests-review", {
+      .get(`http://localhost:3306/requests-review?page=${page}&limit=${PAGE_SIZE}`, {
         headers: {
           token: auth.token,
         },
       })
       .then((resp) => {
         console.log("Requests data:", resp.data);
-        setRequests({ ...requests, results: resp.data, loading: false, err: null });
+        setRequests((prev) => ({ ...prev, results: resp.data.data || [], total: resp.data.total || 0, loading: false, err: null }));
       })
       .catch((err) => {
         console.error("Error fetching requests:", err);
-        setRequests({
-          ...requests,
+        setRequests((prev) => ({
+          ...prev,
           loading: false,
           err: "Something went wrong, please try again later!",
-        });
+        }));
       });
-  }, [requests.reload]);
-  
-  const [jobs, setJobs] = useState({
-    loading: true,
-    results: [],
-    err: null,
-    reload:0
-  });
-
-  useEffect(() => {
-    setJobs({ ...jobs, loading: true });
-    axios
-      .get("http://localhost:3306/jobs")
-      .then((resp) => {
-        console.log(resp);
-        setJobs({ ...jobs,results:resp.data, loading: false, err: null });
-      })
-      .catch((err) => {
-        setJobs({
-          ...jobs,
-          loading: false,
-          err: " something went wrong, please try again later ! ",
-        });
-      });
-  }, []);
-
-  const [users, setUsers] = useState({
-    loading: true,
-    results: [],
-    err: null,
-  });
-
-  useEffect(() => {
-    setUsers({ ...users, loading: true });
-    axios
-      .get("http://localhost:3306/users",{
-        headers: {
-          token:auth.token,
-        },
-      })
-      .then((resp) => {
-        console.log(resp);
-        setUsers({ ...users,results:resp.data, loading: false, err: null });
-      })
-      .catch((err) => {
-        setUsers({
-          ...users,
-          loading: false,
-          err: " something went wrong, please try again later ! ",
-        });
-      });
-  }, []);
+  }, [requests.reload, page, auth.token]);
 
   const acceptReview =(id)=>{
     axios
@@ -100,7 +58,7 @@ const ManageRequests = () => {
       applicationreview: "Accepted",
     },{
       headers: {
-        token:auth.token,
+        token: auth.token,
       },
     })
     .then((resp) => {
@@ -125,7 +83,7 @@ const ManageRequests = () => {
       applicationreview:"Rejected"
     },{
       headers: {
-        token:auth.token,
+        token: auth.token,
       },
     })
     .then((resp) => {
@@ -141,6 +99,8 @@ const ManageRequests = () => {
       setRequests({...requests, loading: false});
     });
   };
+
+    const totalPages = Math.max(1, Math.ceil(requests.total / PAGE_SIZE));
 
     return (
 
@@ -199,7 +159,7 @@ const ManageRequests = () => {
            <td className=" mx-2" style={{wordWrap:"break-word",textAlign:"center"}}>{request.date}</td>
          
            <td style={{textAlign:"center"}}>
-           {!["Accepted","Rejected"].includes(request.applicationreview) ? (
+           { !["Accepted","Rejected"].includes(request.applicationreview) ? (
             <>
              <button className="btn btn-sm btn-success mx-3 my-3" onClick={(e)=>{acceptReview(request.id)}}>Accept</button>
              <button className="btn btn-sm btn-danger mx-3 my-3" onClick={(e)=>{rejectReview(request.id)}}>Reject</button>
@@ -207,30 +167,22 @@ const ManageRequests = () => {
           ): <span className={`btn btn-sm ${request.applicationreview ==="Accepted"? 'btn-success':'btn-danger'} mx-3 my-3`}>{request.applicationreview}</span> }
            
              </td>
-             {jobs.results.map((job)=>(
-            job.id===request.job_id && (
-             <>
-           <td key={job.id}><Link to={"/"+job.id} className="btn btn-sm btn-primary my-4" style={{wordWrap:"break-word",textAlign:"center",margin:"0px 6px 0px"}}>Job Details</Link></td>
-              </>
-           )   ) )
-           
-        }
-             
-
-           {users.results.map((user)=>(
-      
-            user.id===request.user_id && (
-            <>
-           <td style={{wordWrap:"break-word",textAlign:"center",margin:"2px 2px",padding:"5px 5px"}}>{user.name}</td>
-           <td style={{wordWrap:"break-word",textAlign:"center",margin:"2px 2px",padding:"5px 5px"}}>{user.email}</td>
-           <td style={{wordWrap:"break-word",textAlign:"center",margin:"2px 2px",padding:"5px 5px"}}>{user.phone}</td>
-            </>
-           ) ) )}
-         
-        </tr>
+           <td><Link to={"/"+request.job_id} className="btn btn-sm btn-primary my-4" style={{wordWrap:"break-word",textAlign:"center",margin:"0px 6px 0px"}}>{request.jobPosition || "Job Details"}</Link></td>
+           <td style={{wordWrap:"break-word",textAlign:"center",margin:"2px 2px",padding:"5px 5px"}}>{request.userName}</td>
+           <td style={{wordWrap:"break-word",textAlign:"center",margin:"2px 2px",padding:"5px 5px"}}>{request.userEmail}</td>
+           <td style={{wordWrap:"break-word",textAlign:"center",margin:"2px 2px",padding:"5px 5px"}}>{request.userPhone}</td>
+         </tr>
        
      )  
             
       )} </tbody>
-            </Table></div>)}</div>);}
+            </Table>
+            <div className="d-flex justify-content-between align-items-center mt-3">
+              <span>{requests.total} application(s) — page {page} of {totalPages}</span>
+              <div>
+                <button className="btn btn-sm btn-secondary mx-1" disabled={page <= 1} onClick={() => setPage(page - 1)}>Previous</button>
+                <button className="btn btn-sm btn-secondary mx-1" disabled={page >= totalPages} onClick={() => setPage(page + 1)}>Next</button>
+              </div>
+            </div>
+            </div>)}</div>);}
             export  default ManageRequests;

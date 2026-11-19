@@ -1,6 +1,6 @@
 import React from "react";
 import "../css/Footer.css";
-import { FaHeart, FaLinkedin, FaTwitter, FaFacebook, FaGithub } from "react-icons/fa";
+import { FaHeart, FaLinkedin, FaGithub } from "react-icons/fa";
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -29,10 +29,8 @@ const Footer = () => {
           <Col md={4} className="footer-social">
             <h5 className="footer-heading text-white">Connect With Us</h5>
             <div className="social-icons">
-              <a href="#" className="social-icon"><FaLinkedin /></a>
-              <a href="#" className="social-icon"><FaTwitter /></a>
-              <a href="#" className="social-icon"><FaFacebook /></a>
-              <a href="#" className="social-icon"><FaGithub /></a>
+              <a href="https://www.linkedin.com/in/mohamed-ramadan-25a560217/" target="_blank" rel="noreferrer" className="social-icon"><FaLinkedin /></a>
+              <a href="https://github.com/MohamedRamadan200224" target="_blank" rel="noreferrer" className="social-icon"><FaGithub /></a>
             </div>
           </Col>
         </Row>

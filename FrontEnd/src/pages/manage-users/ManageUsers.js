@@ -21,25 +21,29 @@ const ManageUsers = () => {
   });
 
   useEffect(() => {
-    setUsers({ ...users, loading: true });
+    setUsers((prev) => ({ ...prev, loading: true }));
     axios
-      .get("http://localhost:3306/users", {
+      // Perf P0: the list endpoint now returns the paginated envelope
+      // { data, total, page, limit } — unwrap resp.data.data. limit=50
+      // is the server cap, so the table keeps showing every user the
+      // way the old unbounded list did (no pager on this page).
+      .get("http://localhost:3306/users?limit=50", {
         headers: {
           token: auth.token,
         },
       })
       .then((resp) => {
         console.log(resp);
-        setUsers({ ...users, results: resp.data, loading: false, err: null });
+        setUsers((prev) => ({ ...prev, results: resp.data.data || [], loading: false, err: null }));
       })
       .catch((err) => {
-        setUsers({
-          ...users,
+        setUsers((prev) => ({
+          ...prev,
           loading: false,
           err: " something went wrong, please try again later ! ",
-        });
+        }));
       });
-  }, [users.reload]);
+  }, [users.reload, auth.token]);
 
   const deleteUser = (id) => {
     axios

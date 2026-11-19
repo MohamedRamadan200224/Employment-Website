@@ -5,6 +5,7 @@ const admin = require("../middleware/admin");
 const { validationResult, body } = require('express-validator');
 const upload = require('../middleware/uploadimages');
 const util= require('util');
+const { parsePagination, paginatedResponse } = require("../utils/pagination");
 
 //Admin CRUD
 
@@ -102,16 +103,78 @@ try {
 
 //User CRUD
 
-//list all jobs
+//list all jobs (paginated; ?page & ?limit, limit capped at 50)
 router.get("",async (req, res)=>{
+    try {
     const query = util.promisify(connect.query).bind(connect);
-    let search = "";
-    if(req.query.search){
-        search = `where position LIKE '%${req.query.search}%' or field LIKE '%${req.query.search}%' `;
+    const { page, limit, offset } = parsePagination(req);
+    const search = (req.query.search || "").trim();
+
+    // Perf P0: the old search interpolated the query string into SQL
+    // (LIKE '%${search}%') — a leading % means no index can be used even
+    // if one existed, and it was an injection hole. The search now uses
+    // the FULLTEXT index (see BackEnd/db/migrations/001-add-indexes.sql)
+    // with a parameterised placeholder, so the search string never
+    // reaches the SQL text. Boolean-mode operators (+ - * etc.) are
+    // stripped and every word is required as a prefix match (+word*).
+    // NOTE: FULLTEXT ignores words shorter than ft_min_word_len
+    // (default 4), so a 1-3 letter search returns no rows.
+    let where = "";
+    let whereParams = [];
+    if (search) {
+        const booleanQuery = toBooleanQuery(search);
+        if (booleanQuery) {
+            where = "where MATCH(position, field) AGAINST (? IN BOOLEAN MODE)";
+            whereParams = [booleanQuery];
+        }
     }
-    const jobexists = await query(`select * from jobs ${search}`);
-    res.status(200).json(jobexists);
+
+    const jobColumns = "id, position, field, offer, maxcandidate, description, qualifications";
+    let rows;
+    let total;
+    try {
+        const countRows = await query(`select COUNT(*) as total from jobs ${where}`, whereParams);
+        total = countRows[0].total;
+        rows = await query(
+          `select ${jobColumns} from jobs ${where} order by id desc limit ? offset ?`,
+          [...whereParams, limit, offset]
+        );
+    } catch (err) {
+        // The FULLTEXT index has not been applied yet (migration not
+        // run): fall back to a parameterised PREFIX search, which the
+        // jobs(field) index and the UNIQUE key on position can serve.
+        // Any other error is re-thrown.
+        if (search && err && (err.code === "ER_NO_SUCH_INDEX" || err.errno === 1191)) {
+            const like = `${search}%`;
+            const countRows = await query("select COUNT(*) as total from jobs where position LIKE ? or field LIKE ?", [like, like]);
+            total = countRows[0].total;
+            rows = await query(
+              `select ${jobColumns} from jobs where position LIKE ? or field LIKE ? order by id desc limit ? offset ?`,
+              [like, like, limit, offset]
+            );
+        } else {
+            throw err;
+        }
+    }
+
+    res.status(200).json(paginatedResponse(rows, total, { page, limit }));
+    } catch (err) {
+        console.log(err);
+        res.status(500).json(err);
+    }
 });
+
+// Turns a free-text search into a boolean-mode query: "financial manager"
+// becomes "+financial* +manager*". Strips boolean operators and punctuation
+// so user input can never change the query structure.
+function toBooleanQuery(term) {
+  return String(term)
+    .split(/\s+/)
+    .map((word) => word.replace(/[^A-Za-z0-9_]/g, ""))
+    .filter((word) => word.length > 0)
+    .map((word) => `+${word}*`)
+    .join(" ");
+}
 
 // show a specific job
 router.get("/:id",async (req, res)=>{
