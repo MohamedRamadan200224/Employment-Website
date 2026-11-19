@@ -25,10 +25,10 @@ const ManageJobs = () => {
   useEffect(() => {
     setJobs({ ...jobs, loading: true });
     axios
-      .get(apiUrl + "/jobs")
+      .get(apiUrl + "/jobs?limit=50")
       .then((resp) => {
         console.log(resp);
-        setJobs({ ...jobs, results: resp.data, loading: false, err: null });
+        setJobs({ ...jobs, results: resp.data.data || [], loading: false, err: null });
       })
       .catch((err) => {
         setJobs({

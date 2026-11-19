@@ -26,14 +26,14 @@ const ManageUsers = () => {
   useEffect(() => {
     setUsers({ ...users, loading: true });
     axios
-      .get(apiUrl + "/users", {
+      .get(apiUrl + "/users?limit=50", {
         headers: {
           token: auth.token,
         },
       })
       .then((resp) => {
         console.log(resp);
-        setUsers({ ...users, results: resp.data, loading: false, err: null });
+        setUsers({ ...users, results: resp.data.data || [], loading: false, err: null });
       })
       .catch((err) => {
         setUsers({
