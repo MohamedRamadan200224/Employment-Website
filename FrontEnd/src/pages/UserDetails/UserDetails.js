@@ -8,6 +8,9 @@ import { getAuthUser } from "../../helper/Storage";
 import { FaUser, FaEnvelope, FaPhone, FaUserShield, FaCircle } from "react-icons/fa";
 import "./UserDetails.css";
 
+// API base URL from env (REACT_APP_API_URL); default is the local dev backend.
+const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:3306";
+
 const UserDetails = () => {
   let { id } = useParams();
   const auth = getAuthUser();
@@ -21,7 +24,7 @@ const UserDetails = () => {
   useEffect(() => {
     setUser({ ...user, loading: true });
     axios
-      .get("http://localhost:3306/users/" + id, {
+      .get(apiUrl + "/users/" + id, {
         headers: {
           token: auth.token,
         },

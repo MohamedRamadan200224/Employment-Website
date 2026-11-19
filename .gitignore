@@ -1,0 +1,13 @@
+# dependencies
+node_modules/
+# environment / secrets — never commit these
+.env
+.env.local
+# user uploads served by the backend
+upload/
+# build output
+build/
+dist/
+# OS / editor
+.DS_Store
+*.log

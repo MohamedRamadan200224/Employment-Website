@@ -9,6 +9,9 @@ import Spinner from "react-bootstrap/Spinner";
 import { FaBriefcase, FaPlus, FaEye, FaEdit, FaTrash } from "react-icons/fa";
 import "./ManageJobs.css";
 
+// API base URL from env (REACT_APP_API_URL); default is the local dev backend.
+const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:3306";
+
 let deletenum = 0;
 const ManageJobs = () => {
   const auth = getAuthUser();
@@ -22,7 +25,7 @@ const ManageJobs = () => {
   useEffect(() => {
     setJobs({ ...jobs, loading: true });
     axios
-      .get("http://localhost:3306/jobs")
+      .get(apiUrl + "/jobs")
       .then((resp) => {
         console.log(resp);
         setJobs({ ...jobs, results: resp.data, loading: false, err: null });
@@ -38,7 +41,7 @@ const ManageJobs = () => {
 
   const deleteJob = (id) => {
     axios
-      .delete("http://localhost:3306/jobs/" + id, {
+      .delete(apiUrl + "/jobs/" + id, {
         headers: {
           token: auth.token,
         },

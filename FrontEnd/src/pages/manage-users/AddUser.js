@@ -6,6 +6,9 @@ import "../../css/Register.css";
 import axios from "axios";
 import { getAuthUser } from "../../helper/Storage";
 
+// API base URL from env (REACT_APP_API_URL); default is the local dev backend.
+const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:3306";
+
 let addnum=0;
 const AddUser=()=>{
   const auth = getAuthUser();
@@ -26,7 +29,7 @@ const AddUser=()=>{
     
     setAddUser({ ...adduser, loading: true, err: [] });
     axios
-      .post("http://localhost:3306/users",{
+      .post(apiUrl + "/users",{
         name: adduser.name,
         email: adduser.email,
         password:  adduser.password,

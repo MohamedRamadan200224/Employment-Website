@@ -9,6 +9,9 @@ import Container from 'react-bootstrap/Container';
 import { FaUsers, FaPlus, FaEdit, FaTrash } from "react-icons/fa";
 import "./ManageUsers.css";
 
+// API base URL from env (REACT_APP_API_URL); default is the local dev backend.
+const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:3306";
+
 let deletenum = 0;
 const ManageUsers = () => {
 
@@ -23,7 +26,7 @@ const ManageUsers = () => {
   useEffect(() => {
     setUsers({ ...users, loading: true });
     axios
-      .get("http://localhost:3306/users", {
+      .get(apiUrl + "/users", {
         headers: {
           token: auth.token,
         },
@@ -43,7 +46,7 @@ const ManageUsers = () => {
 
   const deleteUser = (id) => {
     axios
-      .delete("http://localhost:3306/users/" + id, {
+      .delete(apiUrl + "/users/" + id, {
         headers: {
           token: auth.token,
         },

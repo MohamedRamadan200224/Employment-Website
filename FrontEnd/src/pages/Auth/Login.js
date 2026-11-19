@@ -9,6 +9,9 @@ import { setAuthUser } from "../../helper/Storage";
 import { FaUser, FaLock, FaSignInAlt } from "react-icons/fa";
 import Container from 'react-bootstrap/Container';
 
+// API base URL from env (REACT_APP_API_URL); default is the local dev backend.
+const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:3306";
+
 const Login = () => {
   const navigate = useNavigate();
   const [login, setLogin] = useState({
@@ -22,21 +25,25 @@ const Login = () => {
     e.preventDefault();
     setLogin({ ...login, loading: true, err: [] });
     axios
-      .post("http://localhost:3306/auth/login", {
+      .post(apiUrl + "/auth/login", {
         email: login.email,
         password: login.password,
       })
       .then((resp) => {
         setLogin({ ...login, loading: false, err: [] });
         setAuthUser(resp.data);
-        console.log(resp.data);
         navigate("/");
       })
       .catch((errors) => {
         setLogin({
           ...login,
           loading: false,
-          err: errors.response.data.errors,
+          err:
+            (errors.response &&
+              errors.response.data &&
+              errors.response.data.errors) || [
+              { msg: "Something went wrong, please try again later!" },
+            ],
         });
       });
   };

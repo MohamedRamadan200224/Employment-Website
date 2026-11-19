@@ -8,6 +8,9 @@ import axios from "axios";
 import { getAuthUser } from "../../helper/Storage";
 import { useParams } from "react-router-dom";
 
+// API base URL from env (REACT_APP_API_URL); default is the local dev backend.
+const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:3306";
+
 let updatenum = 0;
 
 const UpdateUser = () => {
@@ -29,7 +32,7 @@ const UpdateUser = () => {
   // Fetch user data when component mounts
   useEffect(() => {
     axios
-      .get(`http://localhost:3306/users/${id}`, {
+      .get(`${apiUrl}/users/${id}`, {
         headers: {
           token: auth.token,
         },
@@ -58,7 +61,7 @@ const UpdateUser = () => {
   const UpdateFun = (id) => {
     setUpdateUser({ ...updateuser, loading: true, err: [] });
     axios
-      .put("http://localhost:3306/users/"+id, {
+      .put(apiUrl + "/users/"+id, {
         name: updateuser.name,
         email: updateuser.email,
         password: updateuser.password,
