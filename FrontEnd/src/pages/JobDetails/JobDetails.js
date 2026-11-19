@@ -8,7 +8,7 @@ import Form from 'react-bootstrap/Form';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import { FaBriefcase, FaBuilding, FaFileAlt, FaMoneyBillWave, FaGraduationCap, FaUsers, FaPaperPlane } from "react-icons/fa";
+import { FaFileAlt, FaMoneyBillWave, FaGraduationCap, FaUsers, FaPaperPlane } from "react-icons/fa";
 import "./JobDetails.css";
 import Button from 'react-bootstrap/Button';
 
@@ -97,7 +97,7 @@ const JobDetails = () => {
     });
 
     useEffect(() => {
-        setJob({ ...job, loading: true });
+        setJob((prev) => ({ ...prev, loading: true }));
         
         if (useMockData) {
             // Use mock data in development mode
@@ -107,13 +107,13 @@ const JobDetails = () => {
                 const mockJob = sampleJobDetails[jobId];
                 
                 if (mockJob) {
-                    setJob({ ...job, result: mockJob, loading: false, err: null });
+                    setJob((prev) => ({ ...prev, result: mockJob, loading: false, err: null }));
                 } else {
-                    setJob({
-                        ...job,
+                    setJob((prev) => ({
+                        ...prev,
                         loading: false,
                         err: "Job not found!",
-                    });
+                    }));
                 }
             }, 500); // Simulate network delay
         } else {
@@ -121,14 +121,14 @@ const JobDetails = () => {
             axios
                 .get(`${apiUrl}/jobs/${id}`)
                 .then((resp) => {
-                    setJob({ ...job, result: resp.data, loading: false, err: null });
+                    setJob((prev) => ({ ...prev, result: resp.data, loading: false, err: null }));
                 })
                 .catch((err) => {
-                    setJob({
-                        ...job,
+                    setJob((prev) => ({
+                        ...prev,
                         loading: false,
                         err: "Something went wrong, please try again later!",
-                    });
+                    }));
                 });
         }
     }, [job.reload, id]);
@@ -255,7 +255,7 @@ const JobDetails = () => {
                                 </Col>
                             </Row>
 
-                            {auth && job.reload === 0 && auth.type == 0 && (
+                            {auth && job.reload === 0 && auth.type === 0 && (
                                 <div className="application-form-container">
                                     <h3 className="application-form-title">
                                         <FaPaperPlane className="me-2" />

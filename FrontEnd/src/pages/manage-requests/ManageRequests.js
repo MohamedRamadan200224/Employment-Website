@@ -5,8 +5,7 @@ import axios from "axios";
 import { getAuthUser } from "../../helper/Storage";
 import Spinner from "react-bootstrap/Spinner";
 import Alert from "react-bootstrap/Alert";
-import Container from 'react-bootstrap/Container';
-import { FaClipboardList, FaCheck, FaTimes, FaEye } from "react-icons/fa";
+import { FaClipboardList } from "react-icons/fa";
 import "./ManageRequests.css";
 
 const ManageRequests = () => {
@@ -32,7 +31,7 @@ const ManageRequests = () => {
   // / email / phone and the job title already on each row, plus a
   // total for pagination: { data, total, page, limit }.
   useEffect(() => {
-    setRequests({ ...requests, loading: true });
+    setRequests((prev) => ({ ...prev, loading: true }));
     axios
       .get(`http://localhost:3306/requests-review?page=${page}&limit=${PAGE_SIZE}`, {
         headers: {
@@ -41,17 +40,17 @@ const ManageRequests = () => {
       })
       .then((resp) => {
         console.log("Requests data:", resp.data);
-        setRequests({ ...requests, results: resp.data.data || [], total: resp.data.total || 0, loading: false, err: null });
+        setRequests((prev) => ({ ...prev, results: resp.data.data || [], total: resp.data.total || 0, loading: false, err: null }));
       })
       .catch((err) => {
         console.error("Error fetching requests:", err);
-        setRequests({
-          ...requests,
+        setRequests((prev) => ({
+          ...prev,
           loading: false,
           err: "Something went wrong, please try again later!",
-        });
+        }));
       });
-  }, [requests.reload, page]);
+  }, [requests.reload, page, auth.token]);
 
   const acceptReview =(id)=>{
     axios
