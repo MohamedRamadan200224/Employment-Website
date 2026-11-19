@@ -26,6 +26,10 @@ const ManageUsers = () => {
   useEffect(() => {
     setUsers((prev) => ({ ...prev, loading: true }));
     axios
+      // Perf P0: the list endpoint now returns the paginated envelope
+      // { data, total, page, limit } — unwrap resp.data.data. limit=50
+      // is the server cap, so the table keeps showing every user the
+      // way the old unbounded list did (no pager on this page).
       .get(apiUrl + "/users?limit=50", {
         headers: {
           token: auth.token,

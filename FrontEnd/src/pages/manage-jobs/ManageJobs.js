@@ -25,6 +25,10 @@ const ManageJobs = () => {
   useEffect(() => {
     setJobs((prev) => ({ ...prev, loading: true }));
     axios
+      // Perf P0: the list endpoint now returns the paginated envelope
+      // { data, total, page, limit } — unwrap resp.data.data. limit=50
+      // is the server cap, so the table keeps showing every job the
+      // way the old unbounded list did (no pager on this page).
       .get(apiUrl + "/jobs?limit=50")
       .then((resp) => {
         console.log(resp);
