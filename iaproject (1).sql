@@ -107,9 +107,14 @@ INSERT INTO `users` (`id`, `name`, `email`, `password`, `phone`, `token`, `type`
 --
 -- Indexes for table `jobs`
 --
+-- Indexes added 2026-11-19 (perf P0): idx_jobs_field for job lists /
+-- search on `field`, and idx_jobs_position_field (FULLTEXT) for the
+-- MATCH(position, field) job search in BackEnd/routes/Jobs.js.
 ALTER TABLE `jobs`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `title` (`position`);
+  ADD UNIQUE KEY `title` (`position`),
+  ADD KEY `idx_jobs_field` (`field`),
+  ADD FULLTEXT KEY `idx_jobs_position_field` (`position`, `field`);
 
 --
 -- Indexes for table `qualifications`
@@ -122,8 +127,13 @@ ALTER TABLE `qualifications`
 --
 -- Indexes for table `users`
 --
+-- Indexes added 2026-11-19 (perf P0): idx_users_email for login /
+-- register lookups and idx_users_token for the authorize/admin
+-- middleware, which looks users up by token on every request.
 ALTER TABLE `users`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_users_email` (`email`),
+  ADD KEY `idx_users_token` (`token`);
 
 --
 -- AUTO_INCREMENT for dumped tables
