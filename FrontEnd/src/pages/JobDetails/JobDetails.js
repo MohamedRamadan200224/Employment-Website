@@ -174,10 +174,16 @@ const JobDetails = () => {
                     setJob((prev) => ({ ...prev, result: resp.data, loading: false, err: null }));
                 })
                 .catch((err) => {
+                    // A missing job is a 404 now (see GET /jobs/:id):
+                    // show "No job found" instead of the generic error.
+                    const message =
+                        err.response && err.response.status === 404
+                            ? "No job found, please try again later!"
+                            : "Something went wrong, please try again later!";
                     setJob((prev) => ({
                         ...prev,
                         loading: false,
-                        err: "Something went wrong, please try again later!",
+                        err: message,
                     }));
                 });
         }
@@ -331,7 +337,13 @@ const JobDetails = () => {
                                 </Col>
                             </Row>
 
-                            {auth && job.reload === 0 && auth.type === 0 && (
+                            {/* The form is for regular users only (type 1 = admin).
+                                `type` is 0 for a regular user — but sessions stored
+                                before the register response carried `type` have
+                                auth.type === undefined, so gate on "not an admin"
+                                instead of "type is exactly 0", or a freshly
+                                registered user never sees the form. */}
+                            {auth && job.reload === 0 && auth.type !== 1 && (
                                 <div className="application-form-container">
                                     <h3 className="application-form-title">
                                         <FaPaperPlane className="me-2" />

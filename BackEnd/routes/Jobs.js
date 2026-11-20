@@ -142,11 +142,15 @@ router.get("",async (req, res)=>{
           [...whereParams, limit, offset]
         );
     } catch (err) {
-        // The FULLTEXT index has not been applied yet (migration not
-        // run): fall back to a parameterised PREFIX search, which the
-        // jobs(field) index and the UNIQUE key on position can serve.
-        // Any other error is re-thrown.
-        if (search && err && (err.code === "ER_NO_SUCH_INDEX" || err.errno === 1191)) {
+        // The FULLTEXT query can fail for reasons other than a
+        // missing index: on TiDB it rejects MATCH ... AGAINST with
+        // an error code other than 1191, so the old narrow catch
+        // let every search fail with 500 live. When a search term
+        // is present, any MATCH failure now falls back to a
+        // parameterised PREFIX search, which the jobs(field) index
+        // and the UNIQUE key on position can serve. Any other error
+        // is re-thrown.
+        if (search) {
             const like = `${search}%`;
             const countRows = await query("select COUNT(*) as total from jobs where position LIKE ? or field LIKE ?", [like, like]);
             total = countRows[0].total;
@@ -183,6 +187,12 @@ router.get("/:id",async (req, res)=>{
     try {
         const query = util.promisify(connect.query).bind(connect);
         const jobexists = await query("select * from jobs where id = ?",[req.params.id ,]);
+        // A missing id used to return 200 with an empty body, so the
+        // details page could only show its generic "No job found"
+        // fallback. Return 404 like the PUT / DELETE handlers do.
+        if (!jobexists[0]) {
+            return res.status(404).json({msg: "Job is not found"});
+        }
 
         res.status(200).json(jobexists[0]);
     } catch (err) {

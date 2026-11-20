@@ -61,6 +61,11 @@ if (!errors.isEmpty()) {
     if (checkemailfound.length > 0) {
         return res.status(400).json({errors:[{msg:"Email already exists"}]});
     }
+    // The DB defaults `type` to 0 on insert, but the frontend stores
+    // this response as the session (setAuthUser) — so the response
+    // must carry `type` too. Without it, a freshly registered user
+    // had auth.type === undefined and the JobDetails apply form
+    // (gated on the user not being an admin) never rendered.
     const userdata = {
         name: req.body.name,
         email: req.body.email,
@@ -68,6 +73,7 @@ if (!errors.isEmpty()) {
         password: await bcrypt.hash(req.body.password,10),
         token: crypto.randomBytes(16).toString("hex"),
         status: "active",
+        type: 0,
     }
 
 
