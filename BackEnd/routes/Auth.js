@@ -49,7 +49,7 @@ const checkuseremail= await query("select * from users where email = ?",[req.bod
 });
 
 //register
-router.post("/register",body("name").isString().withMessage("enter a correct name"),body("password").isLength({min:8,max:20}).withMessage("enter password equal to or greater than 8 characters"),body ("email").isEmail().withMessage("please enter a correct email"),body("phone").isNumeric().withMessage("please enter correct number"),async (req, res) => {
+router.post("/register",body("name").isString().withMessage("enter a correct name"),body("password").isLength({min:8,max:20}).withMessage("enter password equal to or greater than 8 characters"),body ("email").isEmail().withMessage("please enter a correct email"),body("phone").matches(/^\+?[0-9]{7,15}$/).withMessage("please enter a correct phone number"),async (req, res) => {
     try {
   const errors =validationResult(req);
 if (!errors.isEmpty()) {
@@ -59,7 +59,7 @@ if (!errors.isEmpty()) {
     const query = util.promisify(connect.query).bind(connect);
     const checkemailfound= await query("select * from users where email = ?",[req.body.email]);
     if (checkemailfound.length > 0) {
-        return res.status(400).json({errors:"Email already exists"});
+        return res.status(400).json({errors:[{msg:"Email already exists"}]});
     }
     const userdata = {
         name: req.body.name,
