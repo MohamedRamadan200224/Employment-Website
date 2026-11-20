@@ -77,8 +77,14 @@ const sampleJobDetails = {
     }
 };
 
-// Check if we should use mock data
-const useMockData = process.env.REACT_APP_ENV === 'development';
+// Check if we should use mock data — one switch for the whole
+// frontend (see Home.js): mock data is on only when
+// REACT_APP_USE_MOCK_DATA is 'true'. The old check on REACT_APP_ENV
+// === 'development' kept this page on mock data in production,
+// because the production build has REACT_APP_ENV=development baked
+// in, so the application form (and the CV upload) never rendered
+// there and real jobs showed "Job not found!".
+const useMockData = process.env.REACT_APP_USE_MOCK_DATA === 'true';
 const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3306';
 
 // CV upload limit — must match the backend (BackEnd/middleware/uploadCv.js).
@@ -144,7 +150,7 @@ const JobDetails = () => {
         setJob((prev) => ({ ...prev, loading: true }));
         
         if (useMockData) {
-            // Use mock data in development mode
+            // Use mock data when REACT_APP_USE_MOCK_DATA is 'true'
             setTimeout(() => {
                 // Convert id to number since URL params are strings
                 const jobId = parseInt(id);
@@ -161,7 +167,7 @@ const JobDetails = () => {
                 }
             }, 500); // Simulate network delay
         } else {
-            // Use real API in production mode
+            // Use real API otherwise
             axios
                 .get(`${apiUrl}/jobs/${id}`)
                 .then((resp) => {
@@ -184,14 +190,14 @@ const JobDetails = () => {
         setCv((prev) => ({ ...prev, progress: 0 }));
         
         if (useMockData) {
-            // Simulate API call in development mode
+            // Simulate API call when mock data is on
             setTimeout(() => {
                 setDescription({ err: null, description: "", loading: false });
                 setCv({ file: null, error: null, progress: 0 });
                 setJob({ ...job, reload: job.reload + 1 });
             }, 1000);
         } else {
-            // Use real API in production mode. FormData (not JSON) so
+            // Use real API otherwise. FormData (not JSON) so
             // the optional CV file can ride along; the backend accepts
             // applications with and without a file. onUploadProgress
             // drives the progress bar — on a slow connection the user
@@ -242,7 +248,7 @@ const JobDetails = () => {
                     <h1 className="text-center text-white mb-0">Job Details</h1>
                     {useMockData && (
                         <div className="text-center mt-2">
-                            <span className="badge bg-warning">Using Mock Data (Development)</span>
+                            <span className="badge bg-warning">Using Mock Data</span>
                         </div>
                     )}
                 </Container>

@@ -39,10 +39,27 @@ const Register = () => {
         navigate("/");
       })
       .catch((errors) => {
+        // Normalise the failure into an array of { msg } objects:
+        // the backend returns { errors: [...] } for validation
+        // failures, { errors: "..." } for e.g. a duplicate email,
+        // and { message: "..." } for server errors — and a network
+        // failure has no response at all. The old code took
+        // errors.response.data.errors verbatim, so any other shape
+        // left `err` undefined and the .map() below crashed the
+        // whole page ("Cannot read properties of undefined
+        // (reading 'map')").
+        const data = (errors.response && errors.response.data) || {};
+        let errs = data.errors;
+        if (typeof errs === "string") errs = [{ msg: errs }];
+        if (!Array.isArray(errs)) {
+          errs = data.message
+            ? [{ msg: data.message }]
+            : [{ msg: "Something went wrong, please try again later!" }];
+        }
         setRegister({
           ...register,
           loading: false,
-          err: errors.response.data.errors,
+          err: errs,
         });
       });
   };
@@ -65,7 +82,7 @@ const Register = () => {
 
           {register.err.map((error, index) => (
             <Alert key={index} variant="danger" className="p-2">
-              {error.msg}
+              {error.msg || error}
             </Alert>
           ))}
 

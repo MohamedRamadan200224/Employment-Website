@@ -89,7 +89,7 @@ CREATE TABLE `users` (
   `name` varchar(255) NOT NULL,
   `email` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
-  `phone` int(20) NOT NULL,
+  `phone` varchar(20) NOT NULL,
   `token` varchar(255) NOT NULL,
   `type` tinyint(1) NOT NULL DEFAULT 0 COMMENT 'admin-> 1\r\napplicant->0',
   `status` varchar(255) NOT NULL DEFAULT 'in-active' COMMENT 'active->1\r\ninactive->0'

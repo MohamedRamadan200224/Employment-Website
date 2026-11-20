@@ -14,7 +14,7 @@ const { handleServerError } = require("../utils/errorHandler");
 router.post("",admin,body("name").isString().withMessage("please enter a valid name"),
 body("email").isEmail().withMessage("please enter a valid email address"),
 body("password").isString().withMessage("please enter a valid password"),
-body("phone").isNumeric().withMessage("please enter a valid number"),
+body("phone").matches(/^\+?[0-9]{7,15}$/).withMessage("please enter a valid number"),
 body("status").isString().withMessage("please enter a valid status"),
 body("type").isNumeric().withMessage("please enter a valid number"),async (req, res)=>{
 try {
@@ -50,7 +50,7 @@ try {
 router.put("/:id",admin,body("name").isString().withMessage("please enter a valid name"),
 body("email").isEmail().withMessage("please enter a valid email address"),
 body("password").isString().withMessage("please enter a valid password"),
-body("phone").isNumeric().withMessage("please enter a valid phone number"),
+body("phone").matches(/^\+?[0-9]{7,15}$/).withMessage("please enter a valid phone number"),
 body("type").isNumeric().withMessage("please enter a valid type number"),async (req, res)=>{
 try {
     const query = util.promisify(connect.query).bind(connect);
