@@ -4,6 +4,7 @@ const authorized = require("../middleware/authorize");
 const admin = require("../middleware/admin");
 const { validationResult, body } = require('express-validator');
 const upload = require('../middleware/uploadimages');
+const { handleUploadCv } = require('../middleware/uploadCv');
 const util= require('util');
 const { parsePagination, paginatedResponse } = require("../utils/pagination");
 const { handleServerError } = require("../utils/errorHandler");
@@ -189,8 +190,8 @@ router.get("/:id",async (req, res)=>{
     }
 });
 
-// request a job
-router.post("/request",authorized,
+// request a job (with an optional CV PDF — see middleware/uploadCv.js)
+router.post("/request",authorized,handleUploadCv,
 body("job_id").isNumeric().withMessage("please enter a valid number"),
 body("description").isString().withMessage("please enter a valid qualifications for job request"),
 body("date"), async (req, res)=>{
@@ -206,11 +207,36 @@ body("date"), async (req, res)=>{
         return res.status(404).json({msg: "job not found"});
     }
     
+    // CV (PDF) upload: optional. Multer already enforced PDF-only and
+    // the 5 MB cap; the magic-byte check below is the real verification
+    // (the mimetype header is client-controlled). The PDF is stored in
+    // the row (MEDIUMBLOB) because the deployed backend runs on
+    // serverless with an ephemeral disk — a file on disk would vanish.
+    let cv = null;
+    if (req.file) {
+      if (req.file.buffer.subarray(0, 5).toString("latin1") !== "%PDF-") {
+        return res.status(400).json({ msg: "CV must be a valid PDF file" });
+      }
+      cv = {
+        cv_pdf: req.file.buffer,
+        cv_filename: req.file.originalname,
+        cv_mimetype: "application/pdf",
+        cv_size: req.file.size,
+      };
+    }
     const requestobj={
         user_id:res.locals.user.id ,
         job_id:jobexists[0].id,
         description: req.body.description,
         date: req.body.date,
+        // Pre-existing bug, found while testing this route: the
+        // insert omitted applicationreview, which is NOT NULL with
+        // no default — every application failed with 500 on
+        // strict-mode MySQL/MariaDB (and TiDB). A new application
+        // has no review yet, so it starts empty (pending). The
+        // admin sets it to Accepted/Rejected via PUT.
+        applicationreview: "",
+        ...cv,
     }
     await query("insert into qualifications set ?",requestobj);
 

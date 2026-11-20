@@ -5,6 +5,7 @@ import Alert from "react-bootstrap/Alert";
 import Spinner from "react-bootstrap/Spinner";
 import { getAuthUser } from "../../helper/Storage";
 import Container from 'react-bootstrap/Container';
+import Button from "react-bootstrap/Button";
 import { FaClipboardCheck, FaFileAlt } from "react-icons/fa";
 import "./RequestDetails.css";
 
@@ -21,6 +22,36 @@ const RequestDetails = () => {
     err: null,
     reload: 0,
   });
+  const [cvDownloading, setCvDownloading] = useState(false);
+
+  // Download the attached CV (PDF). A plain link cannot send the
+  // token header the backend requires, so the file is fetched as a
+  // blob with axios and saved from an object URL instead.
+  const downloadCv = () => {
+    if (!request.result || !request.result.cv_filename || cvDownloading) return;
+    setCvDownloading(true);
+    axios
+      .get(apiUrl + "/requests-review/" + id + "/cv", {
+        headers: {
+          token: auth.token,
+        },
+        responseType: "blob",
+      })
+      .then((resp) => {
+        const url = window.URL.createObjectURL(resp.data);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = request.result.cv_filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        setCvDownloading(false);
+      })
+      .catch(() => {
+        setCvDownloading(false);
+      });
+  };
 
   useEffect(() => {
     setRequest((prev) => ({ ...prev, loading: true }));
@@ -92,6 +123,18 @@ const RequestDetails = () => {
                 {request.description}
               </div>
             </div>
+            {request.result.cv_filename && (
+              <div className="request-details-section">
+                <h3 className="request-section-title">CV</h3>
+                <p>
+                  {request.result.cv_filename}
+                  {request.result.cv_size ? ` (${(request.result.cv_size / 1024).toFixed(0)} KB)` : ""}
+                </p>
+                <Button variant="primary" onClick={downloadCv} disabled={cvDownloading}>
+                  {cvDownloading ? "Downloading..." : "Download CV (PDF)"}
+                </Button>
+              </div>
+            )}
           </div>
         )}
 

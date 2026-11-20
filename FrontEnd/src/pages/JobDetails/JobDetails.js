@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import Alert from "react-bootstrap/Alert";
@@ -11,6 +11,7 @@ import Col from 'react-bootstrap/Col';
 import { FaFileAlt, FaMoneyBillWave, FaGraduationCap, FaUsers, FaPaperPlane } from "react-icons/fa";
 import "./JobDetails.css";
 import Button from 'react-bootstrap/Button';
+import ProgressBar from 'react-bootstrap/ProgressBar';
 
 // Sample job data for development environment
 const sampleJobDetails = {
@@ -80,6 +81,9 @@ const sampleJobDetails = {
 const useMockData = process.env.REACT_APP_ENV === 'development';
 const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3306';
 
+// CV upload limit — must match the backend (BackEnd/middleware/uploadCv.js).
+const MAX_CV_SIZE = 5 * 1024 * 1024; // 5 MB
+
 const JobDetails = () => {
     let { id } = useParams();
     const auth = getAuthUser();
@@ -95,6 +99,46 @@ const JobDetails = () => {
         loading: false,
         err: null,
     });
+
+    // CV (PDF) upload: optional. Validated client-side (type / size /
+    // %PDF- magic bytes) before anything is sent, so an invalid file
+    // fails instantly instead of after a slow upload. The backend
+    // enforces the same checks (see BackEnd/middleware/uploadCv.js).
+    const cvInputRef = useRef(null);
+    const [cv, setCv] = useState({
+        file: null,
+        error: null,
+        progress: 0,
+    });
+
+    const handleCvChange = async (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const fail = (message) => {
+            if (cvInputRef.current) cvInputRef.current.value = "";
+            setCv({ file: null, error: message, progress: 0 });
+        };
+        if (file.type !== "application/pdf" && !/\.pdf$/i.test(file.name)) {
+            return fail("Only PDF files are accepted for the CV.");
+        }
+        if (file.size > MAX_CV_SIZE) {
+            return fail("CV is too large — the maximum size is 5 MB.");
+        }
+        try {
+            const head = new Uint8Array(await file.slice(0, 5).arrayBuffer());
+            if (String.fromCharCode(...head) !== "%PDF-") {
+                return fail("That file is not a valid PDF.");
+            }
+        } catch (err) {
+            return fail("Could not read the CV file, please try again.");
+        }
+        setCv({ file: file, error: null, progress: 0 });
+    };
+
+    const removeCv = () => {
+        if (cvInputRef.current) cvInputRef.current.value = "";
+        setCv({ file: null, error: null, progress: 0 });
+    };
 
     useEffect(() => {
         setJob((prev) => ({ ...prev, loading: true }));
@@ -135,32 +179,58 @@ const JobDetails = () => {
 
     const sendRequest = (e) => {
         e.preventDefault();
-        setDescription({ ...description, loading: true });
+        if (description.loading) return;
+        setDescription({ ...description, loading: true, err: null });
+        setCv((prev) => ({ ...prev, progress: 0 }));
         
         if (useMockData) {
             // Simulate API call in development mode
             setTimeout(() => {
                 setDescription({ err: null, description: "", loading: false });
+                setCv({ file: null, error: null, progress: 0 });
                 setJob({ ...job, reload: job.reload + 1 });
             }, 1000);
         } else {
-            // Use real API in production mode
+            // Use real API in production mode. FormData (not JSON) so
+            // the optional CV file can ride along; the backend accepts
+            // applications with and without a file. onUploadProgress
+            // drives the progress bar — on a slow connection the user
+            // sees the upload moving instead of a stuck spinner — and
+            // the 120s timeout surfaces a clear error instead of hanging.
+            const formData = new FormData();
+            formData.append("job_id", id);
+            formData.append("description", description.description);
+            formData.append("date", new Date().toDateString());
+            if (cv.file) formData.append("cv", cv.file);
             axios
-                .post(`${apiUrl}/jobs/request`, {
-                    job_id: id,
-                    description: description.description,
-                    date: new Date().toDateString(),
-                }, {
+                .post(`${apiUrl}/jobs/request`, formData, {
                     headers: {
                         token: auth.token,
+                    },
+                    timeout: 120000,
+                    onUploadProgress: (event) => {
+                        if (!event.total) return;
+                        setCv((prev) => ({ ...prev, progress: Math.round((event.loaded * 100) / event.total) }));
                     },
                 })
                 .then((resp) => {
                     setDescription({ err: null, description: "", loading: false });
+                    setCv({ file: null, error: null, progress: 0 });
                     setJob({ ...job, reload: job.reload + 1 });
                 })
-                .catch((errors) => {
-                    setDescription({ ...description, loading: false });
+                .catch((error) => {
+                    let message = "Something went wrong, please try again later!";
+                    if (error.code === "ECONNABORTED") {
+                        message = "Upload timed out — check your connection and try again.";
+                    } else if (error.response && error.response.status === 413) {
+                        message = "CV is too large — the maximum size is 5 MB.";
+                    } else if (error.response && error.response.data && error.response.data.message) {
+                        message = error.response.data.message;
+                    } else if (error.response && error.response.data && error.response.data.msg) {
+                        message = error.response.data.msg;
+                    }
+                    setDescription({ ...description, loading: false, err: message });
+                    setCv((prev) => ({ ...prev, progress: 0 }));
                 });
         }
     };
@@ -272,6 +342,38 @@ const JobDetails = () => {
                                                 onChange={(e) => setDescription({ ...description, description: e.target.value })}
                                             />
                                         </Form.Group>
+                                        <Form.Group className="mb-3">
+                                            <Form.Label>CV (PDF, optional, max 5 MB)</Form.Label>
+                                            <Form.Control
+                                                type="file"
+                                                accept="application/pdf,.pdf"
+                                                ref={cvInputRef}
+                                                onChange={handleCvChange}
+                                                disabled={description.loading === true}
+                                            />
+                                            <Form.Text className="text-muted">
+                                                Your CV is stored with your application so the employer can download it. PDF only, up to 5 MB.
+                                            </Form.Text>
+                                            {cv.file && (
+                                                <div className="mt-2 d-flex align-items-center gap-2">
+                                                    <span>{cv.file.name} ({(cv.file.size / 1024).toFixed(0)} KB)</span>
+                                                    <Button variant="outline-secondary" size="sm" type="button" onClick={removeCv} disabled={description.loading === true}>
+                                                        Remove
+                                                    </Button>
+                                                </div>
+                                            )}
+                                            {cv.error && (
+                                                <Alert variant="danger" className="mt-2 mb-0">{cv.error}</Alert>
+                                            )}
+                                            {description.loading === true && cv.file && cv.progress > 0 && (
+                                                <ProgressBar now={cv.progress} label={`${cv.progress}%`} className="mt-2" />
+                                            )}
+                                        </Form.Group>
+
+
+                                        {description.err && (
+                                            <Alert variant="danger">{description.err}</Alert>
+                                        )}
 
                                         <Button 
                                             variant="primary" 
