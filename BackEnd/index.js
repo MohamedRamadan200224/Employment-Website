@@ -72,6 +72,9 @@ app.use((err, req, res, next) => {
 // BackEnd/.env, because binding the database port blocks running the
 // API and MySQL on the same host and confuses proxies.
 const PORT = process.env.PORT || 3306;
-app.listen(PORT, "localhost", () => {
+// NOTE: no host argument — the server must listen on all interfaces
+// (0.0.0.0) so a host's reverse proxy (Render, etc.) can reach it.
+// Binding "localhost" made the service unreachable when deployed.
+app.listen(PORT, () => {
   console.log(`server is running on port ${PORT}`);
 });
