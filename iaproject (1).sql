@@ -59,8 +59,12 @@ CREATE TABLE `qualifications` (
   `user_id` int(11) NOT NULL,
   `job_id` int(11) NOT NULL,
   `description` text NOT NULL,
-  `applicationreview` varchar(255) NOT NULL COMMENT 'accepted=>1\r\nrejected=>0',
-  `date` varchar(255) NOT NULL
+  `applicationreview` varchar(255) NOT NULL DEFAULT '' COMMENT 'accepted=>1\r\nrejected=>0',
+  `date` varchar(255) NOT NULL,
+  `cv_pdf` mediumblob DEFAULT NULL,
+  `cv_filename` varchar(255) DEFAULT NULL,
+  `cv_mimetype` varchar(100) DEFAULT NULL,
+  `cv_size` int(10) unsigned DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --

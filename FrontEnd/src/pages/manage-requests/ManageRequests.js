@@ -103,6 +103,32 @@ const ManageRequests = () => {
     });
   };
 
+  // Download an application's CV (PDF). A plain link cannot send the
+  // token header the backend requires, so the file is fetched as a
+  // blob with axios and saved from an object URL instead.
+  const downloadCv = (request) => {
+    axios
+      .get(apiUrl + "/requests-review/" + request.id + "/cv", {
+        headers: {
+          token: auth.token,
+        },
+        responseType: "blob",
+      })
+      .then((resp) => {
+        const url = window.URL.createObjectURL(resp.data);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = request.cv_filename || "cv.pdf";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+      })
+      .catch((err) => {
+        console.error("Error downloading CV:", err);
+      });
+  };
+
     const totalPages = Math.max(1, Math.ceil(requests.total / PAGE_SIZE));
 
     return (
@@ -150,6 +176,7 @@ const ManageRequests = () => {
           <th>Applicant Name</th>
           <th>Applicant Email</th>
           <th>Applicant Phone</th>
+          <th>CV</th>
         </tr>
       </thead>
       <tbody>
@@ -174,6 +201,13 @@ const ManageRequests = () => {
            <td style={{wordWrap:"break-word",textAlign:"center",margin:"2px 2px",padding:"5px 5px"}}>{request.userName}</td>
            <td style={{wordWrap:"break-word",textAlign:"center",margin:"2px 2px",padding:"5px 5px"}}>{request.userEmail}</td>
            <td style={{wordWrap:"break-word",textAlign:"center",margin:"2px 2px",padding:"5px 5px"}}>{request.userPhone}</td>
+           <td style={{textAlign:"center"}}>
+             {request.cv_filename ? (
+               <button className="btn btn-sm btn-outline-primary mx-2 my-3" onClick={() => downloadCv(request)}>Download PDF</button>
+             ) : (
+               <span className="text-muted">—</span>
+             )}
+           </td>
          </tr>
        
      )  
