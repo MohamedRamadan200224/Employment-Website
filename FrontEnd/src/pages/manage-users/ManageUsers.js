@@ -9,6 +9,9 @@ import Container from 'react-bootstrap/Container';
 import { FaUsers, FaPlus, FaEdit, FaTrash } from "react-icons/fa";
 import "./ManageUsers.css";
 
+// API base URL from env (REACT_APP_API_URL); default is the local dev backend.
+const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:3306";
+
 let deletenum = 0;
 const ManageUsers = () => {
 
@@ -27,7 +30,7 @@ const ManageUsers = () => {
       // { data, total, page, limit } — unwrap resp.data.data. limit=50
       // is the server cap, so the table keeps showing every user the
       // way the old unbounded list did (no pager on this page).
-      .get("http://localhost:3306/users?limit=50", {
+      .get(apiUrl + "/users?limit=50", {
         headers: {
           token: auth.token,
         },
@@ -47,7 +50,7 @@ const ManageUsers = () => {
 
   const deleteUser = (id) => {
     axios
-      .delete("http://localhost:3306/users/" + id, {
+      .delete(apiUrl + "/users/" + id, {
         headers: {
           token: auth.token,
         },

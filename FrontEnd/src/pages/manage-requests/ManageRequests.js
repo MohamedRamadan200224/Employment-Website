@@ -8,6 +8,9 @@ import Alert from "react-bootstrap/Alert";
 import { FaClipboardList } from "react-icons/fa";
 import "./ManageRequests.css";
 
+// API base URL from env (REACT_APP_API_URL); default is the local dev backend.
+const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:3306";
+
 const ManageRequests = () => {
   let reqnum = 0;
   const auth = getAuthUser();
@@ -33,7 +36,7 @@ const ManageRequests = () => {
   useEffect(() => {
     setRequests((prev) => ({ ...prev, loading: true }));
     axios
-      .get(`http://localhost:3306/requests-review?page=${page}&limit=${PAGE_SIZE}`, {
+      .get(`${apiUrl}/requests-review?page=${page}&limit=${PAGE_SIZE}`, {
         headers: {
           token: auth.token,
         },
@@ -54,7 +57,7 @@ const ManageRequests = () => {
 
   const acceptReview =(id)=>{
     axios
-    .put("http://localhost:3306/requests-review/"+id,{
+    .put(apiUrl + "/requests-review/"+id,{
       applicationreview: "Accepted",
     },{
       headers: {
@@ -79,7 +82,7 @@ const ManageRequests = () => {
   };
   let rejectReview =(id)=>{
     axios
-    .put("http://localhost:3306/requests-review/"+id,{
+    .put(apiUrl + "/requests-review/"+id,{
       applicationreview:"Rejected"
     },{
       headers: {

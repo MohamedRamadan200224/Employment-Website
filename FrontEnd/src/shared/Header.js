@@ -1,4 +1,5 @@
 import React from "react";
+import axios from "axios";
 import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
@@ -7,11 +8,23 @@ import { removeAuthUser, getAuthUser } from "../helper/Storage";
 import { FaUserCircle, FaSignOutAlt, FaList, FaUsers, FaClipboardList, FaSignInAlt, FaUserPlus } from "react-icons/fa";
 import "../css/Header.css";
 
+// API base URL from env (REACT_APP_API_URL); default is the local dev backend.
+const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:3306";
+
 const Header = () => {
   const navigate = useNavigate();
   const auth = getAuthUser();
   
+  // Security: log out on the server too. The old code only cleared
+  // localStorage, which left the permanent token valid forever.
+  // Best-effort: the local session is cleared even if the request
+  // fails (e.g. the backend is down or the token is already dead).
   const Logout = () => {
+    if (auth && auth.token) {
+      axios
+        .post(`${apiUrl}/auth/logout`, null, { headers: { token: auth.token } })
+        .catch(() => {});
+    }
     removeAuthUser();
     navigate("/");
   };

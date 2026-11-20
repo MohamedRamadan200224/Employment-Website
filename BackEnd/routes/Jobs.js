@@ -6,6 +6,7 @@ const { validationResult, body } = require('express-validator');
 const upload = require('../middleware/uploadimages');
 const util= require('util');
 const { parsePagination, paginatedResponse } = require("../utils/pagination");
+const { handleServerError } = require("../utils/errorHandler");
 
 //Admin CRUD
 
@@ -36,7 +37,7 @@ try {
     res.status(200).json({msg: 'job created successfully'});
 
 } catch (err) {
-    res.status(500).json(err);
+    return handleServerError(res, err);
 }
 });
 
@@ -57,7 +58,7 @@ try {
     // find if the job exists
     const jobexists = await query("select * from jobs where id = ?",[req.params.id,] );
     if (!jobexists[0]) {
-        res.status(404).json({msg: "Job is not found"});
+        return res.status(404).json({msg: "Job is not found"});
     } 
 
     //insert a new information
@@ -75,7 +76,7 @@ try {
 
 } catch (err) {
     console.log(err);
-    res.status(500).json(err);
+    return handleServerError(res, err);
 }
 });
 
@@ -87,7 +88,7 @@ try {
     const query = util.promisify(connect.query).bind(connect);
     const jobexists = await query("select * from jobs where id = ?",[req.params.id ,]);
     if (!jobexists[0]) {
-        res.status(404).json({msg: "Job is not found"});
+        return res.status(404).json({msg: "Job is not found"});
     } 
 
     // delete the job
@@ -96,7 +97,7 @@ try {
 
 
 } catch (err) {
-    res.status(500).json(err);
+    return handleServerError(res, err);
 }
 });
 
@@ -160,7 +161,7 @@ router.get("",async (req, res)=>{
     res.status(200).json(paginatedResponse(rows, total, { page, limit }));
     } catch (err) {
         console.log(err);
-        res.status(500).json(err);
+        return handleServerError(res, err);
     }
 });
 
@@ -178,11 +179,14 @@ function toBooleanQuery(term) {
 
 // show a specific job
 router.get("/:id",async (req, res)=>{
-    const query = util.promisify(connect.query).bind(connect);
-    const jobexists = await query("select * from jobs where id = ?",[req.params.id ,]);
-  
+    try {
+        const query = util.promisify(connect.query).bind(connect);
+        const jobexists = await query("select * from jobs where id = ?",[req.params.id ,]);
 
-    res.status(200).json(jobexists[0]);
+        res.status(200).json(jobexists[0]);
+    } catch (err) {
+        return handleServerError(res, err);
+    }
 });
 
 // request a job
@@ -214,7 +218,7 @@ body("date"), async (req, res)=>{
 
 }catch (e) {
     console.log(e);
-    res.status(500).json(e);
+    return handleServerError(res, e);
 }
 });
 

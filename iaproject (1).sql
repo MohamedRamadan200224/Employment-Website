@@ -95,9 +95,16 @@ CREATE TABLE `users` (
 -- Dumping data for table `users`
 --
 
+-- Security (2026-11-19): auth tokens are NEVER seeded. Tokens are
+-- issued by the API at login (Auth.js rotates a fresh token on every
+-- successful login) and invalidated by /auth/logout. The seeded users
+-- below therefore have an empty token and cannot authenticate until
+-- they log in with their password. If you seeded a database from an
+-- older dump, rotate the tokens there too (UPDATE users SET token = ''
+-- or a fresh random value) — the values in the old dump are public.
 INSERT INTO `users` (`id`, `name`, `email`, `password`, `phone`, `token`, `type`, `status`) VALUES
-(39, 'mohamadwd', 'admin2023@admin.com', '$2b$10$W7wwgWmkRXUVEBY1LYNXzuwobmb1tkCLCNgkHQBi5Yv9lNen9fUUa', 2147483647, '551228f5943fa26010d05ca54fdc40cf', 1, 'active'),
-(42, 'mdmeapeapjd', 'moha2023@gmail.com', '$2b$10$ZuMqzRjTqBLax1fkNFOdjugOX5.yO8vDWBZqzAvKKgdVc/r6AfUu.', 1000233333, '012355dee569d6e05791860bdefe9b38', 0, 'active'),
+(39, 'mohamadwd', 'admin2023@admin.com', '$2b$10$W7wwgWmkRXUVEBY1LYNXzuwobmb1tkCLCNgkHQBi5Yv9lNen9fUUa', 2147483647, '', 1, 'active'),
+(42, 'mdmeapeapjd', 'moha2023@gmail.com', '$2b$10$ZuMqzRjTqBLax1fkNFOdjugOX5.yO8vDWBZqzAvKKgdVc/r6AfUu.', 1000233333, '', 0, 'active'),
 (43, 'olduser2020', 'olduser2020@gmail.com', '$2b$10$NDrfJpxQVP97yXFaAtLefe8.imUhNF2QHk329SfCJiBqkB5pSFmAS', 1002434334, '', 0, 'active');
 
 --

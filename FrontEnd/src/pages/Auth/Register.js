@@ -9,6 +9,9 @@ import { setAuthUser } from "../../helper/Storage";
 import { FaUser, FaLock, FaEnvelope, FaPhone, FaUserPlus } from "react-icons/fa";
 import Container from 'react-bootstrap/Container';
 
+// API base URL from env (REACT_APP_API_URL); default is the local dev backend.
+const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:3306";
+
 const Register = () => {
   const navigate = useNavigate();
   const [register, setRegister] = useState({
@@ -24,7 +27,7 @@ const Register = () => {
     e.preventDefault();
     setRegister({ ...register, loading: true, err: [] });
     axios
-      .post("http://localhost:3306/auth/register", {
+      .post(apiUrl + "/auth/register", {
         name: register.name,
         email: register.email,
         password: register.password,
