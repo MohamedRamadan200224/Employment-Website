@@ -82,8 +82,8 @@ console.log("Environment variables:", {
   nodeEnv: process.env.NODE_ENV
 });
 
-// Force mock data for testing (you can remove this line later)
-const useMockData = true; // process.env.REACT_APP_USE_MOCK_DATA === 'true';
+// Use mock data only when REACT_APP_USE_MOCK_DATA is 'true' in FrontEnd/.env
+const useMockData = process.env.REACT_APP_USE_MOCK_DATA === 'true';
 const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3306';
 
 const Home = () => {
