@@ -13,14 +13,22 @@ const mysql = require("mysql");
 // caller does util.promisify(connection.query).bind(connection), and
 // pool.query has the same (sql, values, callback) signature, so no
 // caller had to change for this swap.
+// TLS: TiDB Cloud Serverless (and most hosted MySQL) refuses connections
+// over plain transport ("Connections using insecure transport are
+// prohibited"). Use TLS whenever the database is a remote host; local
+// development against localhost keeps plain connections.
+const dbHost = process.env.DB_HOST || "localhost";
+const dbIsRemote = dbHost !== "localhost" && dbHost !== "127.0.0.1";
+
 const pool = mysql.createPool({
   connectionLimit: 10,
   queueLimit: 0,
-  host: process.env.DB_HOST || "localhost",
+  host: dbHost,
   user: process.env.DB_USER || "root",
   password: process.env.DB_PASSWORD || "",
   database: process.env.DB_NAME || "iaproject",
   port: process.env.DB_PORT || "3306",
+  ssl: dbIsRemote ? { rejectUnauthorized: true } : undefined,
 });
 
 // Idle-connection errors (e.g. the server closing a stale connection)
