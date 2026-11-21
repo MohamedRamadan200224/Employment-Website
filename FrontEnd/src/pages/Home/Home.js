@@ -218,6 +218,7 @@ const Home = () => {
                   field={job.field}
                   description={job.description}
                   id={job.id}
+                  slug={job.slug}
                   salary={job.offer || "Competitive"}
                   workTime={job.workTime || "Full-time"}
                 />

@@ -33,6 +33,7 @@ CREATE TABLE `jobs` (
   `description` text NOT NULL,
   `field` varchar(255) NOT NULL,
   `position` varchar(255) NOT NULL,
+  `slug` varchar(255) DEFAULT NULL,
   `maxcandidate` int(11) NOT NULL,
   `offer` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -41,12 +42,19 @@ CREATE TABLE `jobs` (
 -- Dumping data for table `jobs`
 --
 
-INSERT INTO `jobs` (`id`, `qualifications`, `description`, `field`, `position`, `maxcandidate`, `offer`) VALUES
-(2, 'experience: 2 years, required: react html css js', 'desc1lawdmwaldnadalwdlawndlandlawdnalndw', 'finance', 'financial manager 1000', 1, 'worktime : 3 hours, salary : 1000$ladjwlawdwjldlajdalwjdawljdajdljawdawljdajldjadda'),
-(3, 'experience: 2 years, required: react html css js', 'desc2', 'finances to bedawdawad', 'financial', 90, 'worktime : 8 hours, salary : 2000$;sefeksfkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk'),
-(5, 'experience: 2 years, required: react html css;andadwndlnawjdandljadnljandlajwdnaljdnajdnajwddnwjdwjddjwdjwdjdjwjwjdjdjwdjwjwdjdjwdjwjdjdwjdjwjdwjdjdjwjwjdjjwdjwjdjwjdjwjdwjwdjwjdjwdjwwjdjwjdjwdjdw', 'desc3', 'finances', 'financial n', 90, 'worktime : 8 hours, salary : 2000$'),
-(9, 'awdwad', 'awddaw', 'awdawd', 'adw', 23, 'awdaw'),
-(13, 'slemfse', 'jejlsf', 'nn', 'bmk', 10, 'selfsmfe');
+-- Realistic jobs (2026-11-21): the seeded rows were placeholder text
+-- with no meaning ("bmk", "adw", "financial n" ...). The five seeded
+-- jobs keep their ids, so existing applications keep pointing at the
+-- same jobs; ids 14-16 are new. Slugs match migration 004.
+INSERT INTO `jobs` (`id`, `qualifications`, `description`, `field`, `position`, `slug`, `maxcandidate`, `offer`) VALUES
+(2, '3+ years of experience with MongoDB, Express.js, React and Node.js. Strong understanding of REST APIs, Git and agile workflows. BSc in Computer Science or a related field.', 'We are looking for a Full-Stack Developer to build and maintain modern web applications using the MERN stack (MongoDB, Express.js, React and Node.js). You will work with our product team to design features, build REST APIs and deliver responsive user interfaces.', 'Software Development', 'Full-Stack Developer (MERN)', 'full-stack-developer-mern', 3, 'Work type: Full-time (Remote), Salary: 30,000 EGP/month'),
+(3, '2+ years of experience with Node.js and Express. Experience with SQL or NoSQL databases and REST API design. Familiarity with Docker and automated testing is a plus.', 'We are looking for a Backend Developer to design and build reliable server-side applications and APIs. You will work on database design, authentication, performance optimisation and integrations with third-party services.', 'Software Engineering', 'Backend Developer (Node.js)', 'backend-developer-nodejs', 2, 'Work type: Full-time (Hybrid - Cairo), Salary: 28,000 EGP/month'),
+(5, '2+ years of experience with React, JavaScript, HTML and CSS. Experience with responsive design and state management (Redux or Context API). Familiarity with TypeScript is a plus.', 'We are looking for a Frontend Developer to build responsive and accessible user interfaces with React. You will turn designs into pixel-perfect components, work with backend developers on API integration and keep our UI consistent and fast.', 'Web Development', 'Frontend Developer (React)', 'frontend-developer-react', 2, 'Work type: Full-time (Remote), Salary: 25,000 EGP/month'),
+(9, 'Portfolio of UI/UX work. Proficiency in Figma. Understanding of user research, wireframing and design systems.', 'We are looking for a UI/UX Designer to design clean and user-friendly interfaces for our web platform. You will run user research, create wireframes and prototypes, and work closely with developers to ship polished experiences.', 'Design', 'UI/UX Designer', 'ui-ux-designer', 1, 'Work type: Full-time (On-site - Cairo), Salary: 22,000 EGP/month'),
+(13, 'Experience with Excel, SQL and data visualisation tools (Power BI or Tableau). Strong analytical thinking and communication skills.', 'We are looking for a Data Analyst to turn data into clear reports and recommendations. You will build dashboards, analyse product and hiring data, and help teams make decisions based on evidence.', 'Data Analysis', 'Data Analyst', 'data-analyst', 2, 'Work type: Full-time (Hybrid - Giza), Salary: 24,000 EGP/month'),
+(14, 'Experience with Docker, CI/CD pipelines and a cloud platform (AWS or similar). Familiarity with Linux, Git and monitoring tools. Strong troubleshooting skills.', 'We are looking for a DevOps Engineer to build and maintain our deployment pipelines and cloud infrastructure. You will automate builds and releases, monitor services and help developers ship safely and quickly.', 'Infrastructure', 'DevOps Engineer', 'devops-engineer', 1, 'Work type: Full-time (Remote), Salary: 32,000 EGP/month'),
+(15, 'Experience with Flutter and Dart. Understanding of mobile UI patterns and REST API integration. Experience publishing apps to Google Play or the App Store is a plus.', 'We are looking for a Mobile Developer to build cross-platform apps with Flutter. You will work with designers and backend developers to deliver smooth, reliable mobile experiences on Android and iOS.', 'Mobile Development', 'Mobile Developer (Flutter)', 'mobile-developer-flutter', 2, 'Work type: Full-time (Remote), Salary: 27,000 EGP/month'),
+(16, 'Experience in manual testing of web applications. Ability to write clear test cases and bug reports. Familiarity with automated testing tools is a plus.', 'We are looking for a QA Engineer to test our web platform and keep releases reliable. You will write test cases, report bugs clearly and work with developers to verify fixes before release.', 'Quality Assurance', 'QA Engineer', 'qa-engineer', 2, 'Work type: Full-time (Hybrid - Cairo), Salary: 23,000 EGP/month');
 
 -- --------------------------------------------------------
 
@@ -74,9 +82,7 @@ CREATE TABLE `qualifications` (
 INSERT INTO `qualifications` (`id`, `user_id`, `job_id`, `description`, `applicationreview`, `date`) VALUES
 (56, 42, 2, 'CV:\nName:mohamed ramadan', 'Accepted', ''),
 (57, 42, 5, 'nadnwadandadnwna', 'Rejected', ''),
-(58, 42, 3, 'bbkbkbkkbkbkbkb', 'Accepted', 'Mon May 08 2023'),
-(59, 42, 2, ',n,', 'Accepted', 'Mon May 08 2023'),
-(60, 42, 2, 'how to', '', 'Tue May 09 2023');
+(58, 42, 3, 'bbkbkbkkbkbkbkb', 'Accepted', 'Mon May 08 2023');
 
 -- --------------------------------------------------------
 
@@ -124,6 +130,7 @@ INSERT INTO `users` (`id`, `name`, `email`, `password`, `phone`, `token`, `type`
 ALTER TABLE `jobs`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `title` (`position`),
+  ADD UNIQUE KEY `uq_jobs_slug` (`slug`),
   ADD KEY `idx_jobs_field` (`field`),
   ADD FULLTEXT KEY `idx_jobs_position_field` (`position`, `field`);
 
@@ -133,7 +140,8 @@ ALTER TABLE `jobs`
 ALTER TABLE `qualifications`
   ADD PRIMARY KEY (`id`),
   ADD KEY `job_request` (`job_id`),
-  ADD KEY `user_request` (`user_id`);
+  ADD KEY `user_request` (`user_id`),
+  ADD UNIQUE KEY `uq_qualifications_user_job` (`user_id`, `job_id`);
 
 --
 -- Indexes for table `users`

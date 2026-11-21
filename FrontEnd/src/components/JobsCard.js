@@ -27,7 +27,7 @@ const JobsCard = (props) => {
         <Card.Text className="job-description">
           {props.description}
         </Card.Text>
-        <Link className="btn btn-primary" to={"/" + props.id}>
+        <Link className="btn btn-primary" to={"/" + (props.slug || props.id)}>
           View Details <FaArrowRight className="ms-2" />
         </Link>
       </Card.Body>

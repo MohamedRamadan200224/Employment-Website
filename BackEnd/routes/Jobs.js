@@ -8,6 +8,7 @@ const { handleUploadCv } = require('../middleware/uploadCv');
 const util= require('util');
 const { parsePagination, paginatedResponse } = require("../utils/pagination");
 const { handleServerError } = require("../utils/errorHandler");
+const { slugify, generateUniqueSlug } = require("../utils/slugify");
 
 //Admin CRUD
 
@@ -34,6 +35,9 @@ try {
     };
 
     
+    // The job-details URL uses a slug, not the numeric id.
+    job.slug = await generateUniqueSlug(query, slugify(req.body.position));
+
     await query("insert into jobs set ?",job)
     res.status(200).json({msg: 'job created successfully'});
 
@@ -71,6 +75,12 @@ try {
         offer: req.body.offer,
         description: req.body.description,
     };
+    // Regenerate the slug when the title changed (or the job never
+    // had one), so the URL keeps matching the title. The helper
+    // appends -2, -3, ... if another job already has that slug.
+    if (req.body.position !== jobexists[0].position || !jobexists[0].slug) {
+        jobreq.slug = await generateUniqueSlug(query, slugify(req.body.position), jobexists[0].id);
+    }
     await query("update jobs set ? where id= ?",[jobreq,jobexists[0].id]);
     res.status(200).json({msg:"updated jobs successfully"});
 
@@ -131,7 +141,7 @@ router.get("",async (req, res)=>{
         }
     }
 
-    const jobColumns = "id, position, field, offer, maxcandidate, description, qualifications";
+    const jobColumns = "id, position, slug, field, offer, maxcandidate, description, qualifications";
     let rows;
     let total;
     try {
@@ -182,19 +192,51 @@ function toBooleanQuery(term) {
     .join(" ");
 }
 
-// show a specific job
-router.get("/:id",async (req, res)=>{
+// Has the logged-in user already applied for this job? The details
+// page asks this so it can show "already applied" instead of the
+// form — the POST /request 409 below is the enforcement, this is
+// only the UI hint. Defined before GET /:slugOrId (same prefix).
+router.get("/:slugOrId/applied", authorized, async (req, res) => {
     try {
         const query = util.promisify(connect.query).bind(connect);
-        const jobexists = await query("select * from jobs where id = ?",[req.params.id ,]);
+        const job = await findJobBySlugOrId(query, req.params.slugOrId);
+        if (!job) {
+            return res.status(404).json({ msg: "Job is not found" });
+        }
+        const rows = await query(
+            "select id from qualifications where user_id = ? and job_id = ? limit 1",
+            [res.locals.user.id, job.id]
+        );
+        res.status(200).json({ applied: !!rows[0] });
+    } catch (err) {
+        return handleServerError(res, err);
+    }
+});
+
+// Look a job up by its URL slug (/full-stack-developer-mern) or,
+// for old links and the admin pages, by numeric id.
+async function findJobBySlugOrId(query, slugOrId) {
+    const param = String(slugOrId);
+    let rows = await query("select * from jobs where slug = ?", [param]);
+    if (!rows[0] && /^\d+$/.test(param)) {
+        rows = await query("select * from jobs where id = ?", [param]);
+    }
+    return rows[0] || null;
+}
+
+// show a specific job
+router.get("/:slugOrId",async (req, res)=>{
+    try {
+        const query = util.promisify(connect.query).bind(connect);
+        const jobexists = await findJobBySlugOrId(query, req.params.slugOrId);
         // A missing id used to return 200 with an empty body, so the
         // details page could only show its generic "No job found"
         // fallback. Return 404 like the PUT / DELETE handlers do.
-        if (!jobexists[0]) {
+        if (!jobexists) {
             return res.status(404).json({msg: "Job is not found"});
         }
 
-        res.status(200).json(jobexists[0]);
+        res.status(200).json(jobexists);
     } catch (err) {
         return handleServerError(res, err);
     }
@@ -215,6 +257,17 @@ body("date"), async (req, res)=>{
     const jobexists= await query("select * from jobs where id=?",[req.body.job_id,]);
     if (!jobexists[0]) {
         return res.status(404).json({msg: "job not found"});
+    }
+
+    // One application per user per job: answer 409 when this user
+    // already applied (the UNIQUE key on (user_id, job_id) is the
+    // race guard — its violation is mapped to the same 409 below).
+    const existing = await query(
+        "select id from qualifications where user_id = ? and job_id = ? limit 1",
+        [res.locals.user.id, jobexists[0].id]
+    );
+    if (existing[0]) {
+        return res.status(409).json({ msg: "You have already applied for this job." });
     }
     
     // CV (PDF) upload: optional. Multer already enforced PDF-only and
@@ -253,6 +306,11 @@ body("date"), async (req, res)=>{
     res.status(200).json({msg: 'requested job successfully'});
 
 }catch (e) {
+    // Race guard: two requests slipping past the check above hit the
+    // UNIQUE(user_id, job_id) key — same clean 409, not a 500.
+    if (e && (e.code === "ER_DUP_ENTRY" || e.errno === 1062)) {
+        return res.status(409).json({ msg: "You have already applied for this job." });
+    }
     console.log(e);
     return handleServerError(res, e);
 }

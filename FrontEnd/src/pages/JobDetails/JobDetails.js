@@ -87,11 +87,14 @@ const sampleJobDetails = {
 const useMockData = process.env.REACT_APP_USE_MOCK_DATA === 'true';
 const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3306';
 
+// Mock mode only: match the URL slug against the sample titles.
+const toSlug = (text) => String(text || "").toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+
 // CV upload limit — must match the backend (BackEnd/middleware/uploadCv.js).
 const MAX_CV_SIZE = 5 * 1024 * 1024; // 5 MB
 
 const JobDetails = () => {
-    let { id } = useParams();
+    let { slug } = useParams();
     const auth = getAuthUser();
     const [job, setJob] = useState({
         loading: true,
@@ -99,6 +102,11 @@ const JobDetails = () => {
         err: null,
         reload: 0,
     });
+
+    // True when the logged-in user already applied for this job
+    // (checked against the backend once the job loads) — the form
+    // is replaced by an "already applied" note instead.
+    const [alreadyApplied, setAlreadyApplied] = useState(false);
 
     const [description, setDescription] = useState({
         description: "",
@@ -148,13 +156,17 @@ const JobDetails = () => {
 
     useEffect(() => {
         setJob((prev) => ({ ...prev, loading: true }));
-        
+        setAlreadyApplied(false);
+
         if (useMockData) {
             // Use mock data when REACT_APP_USE_MOCK_DATA is 'true'
             setTimeout(() => {
-                // Convert id to number since URL params are strings
-                const jobId = parseInt(id);
-                const mockJob = sampleJobDetails[jobId];
+                // The URL carries a slug now: match a sample job by
+                // its slugified title, falling back to the numeric id
+                // for old links.
+                const mockJob =
+                    Object.values(sampleJobDetails).find((j) => toSlug(j.position) === slug) ||
+                    sampleJobDetails[parseInt(slug, 10)];
                 
                 if (mockJob) {
                     setJob((prev) => ({ ...prev, result: mockJob, loading: false, err: null }));
@@ -169,12 +181,19 @@ const JobDetails = () => {
         } else {
             // Use real API otherwise
             axios
-                .get(`${apiUrl}/jobs/${id}`)
+                .get(`${apiUrl}/jobs/${slug}`)
                 .then((resp) => {
                     setJob((prev) => ({ ...prev, result: resp.data, loading: false, err: null }));
+                    const currentAuth = getAuthUser();
+                    if (currentAuth) {
+                        axios
+                            .get(`${apiUrl}/jobs/${slug}/applied`, { headers: { token: currentAuth.token } })
+                            .then((r) => setAlreadyApplied(!!(r.data && r.data.applied)))
+                            .catch(() => setAlreadyApplied(false));
+                    }
                 })
                 .catch((err) => {
-                    // A missing job is a 404 now (see GET /jobs/:id):
+                    // A missing job is a 404 now (see GET /jobs/:slugOrId):
                     // show "No job found" instead of the generic error.
                     const message =
                         err.response && err.response.status === 404
@@ -187,7 +206,7 @@ const JobDetails = () => {
                     }));
                 });
         }
-    }, [job.reload, id]);
+    }, [job.reload, slug]);
 
     const sendRequest = (e) => {
         e.preventDefault();
@@ -210,7 +229,7 @@ const JobDetails = () => {
             // sees the upload moving instead of a stuck spinner — and
             // the 120s timeout surfaces a clear error instead of hanging.
             const formData = new FormData();
-            formData.append("job_id", id);
+            formData.append("job_id", job.result.id);
             formData.append("description", description.description);
             formData.append("date", new Date().toDateString());
             if (cv.file) formData.append("cv", cv.file);
@@ -236,6 +255,9 @@ const JobDetails = () => {
                         message = "Upload timed out — check your connection and try again.";
                     } else if (error.response && error.response.status === 413) {
                         message = "CV is too large — the maximum size is 5 MB.";
+                    } else if (error.response && error.response.status === 409) {
+                        message = (error.response.data && error.response.data.msg) || "You have already applied for this job.";
+                        setAlreadyApplied(true);
                     } else if (error.response && error.response.data && error.response.data.message) {
                         message = error.response.data.message;
                     } else if (error.response && error.response.data && error.response.data.msg) {
@@ -343,7 +365,7 @@ const JobDetails = () => {
                                 auth.type === undefined, so gate on "not an admin"
                                 instead of "type is exactly 0", or a freshly
                                 registered user never sees the form. */}
-                            {auth && job.reload === 0 && auth.type !== 1 && (
+                            {auth && job.reload === 0 && auth.type !== 1 && !alreadyApplied && (
                                 <div className="application-form-container">
                                     <h3 className="application-form-title">
                                         <FaPaperPlane className="me-2" />
@@ -410,6 +432,15 @@ const JobDetails = () => {
                                         </Button>
                                     </Form>
                                 </div>
+                            )}
+
+                            {auth && job.reload === 0 && alreadyApplied && (
+                                <Alert variant="info" className="application-success">
+                                    <div className="d-flex align-items-center">
+                                        <i className="fas fa-check-circle me-2"></i>
+                                        <span>You have already applied for this position.</span>
+                                    </div>
+                                </Alert>
                             )}
 
                             {auth && job.reload !== 0 && (

@@ -197,7 +197,7 @@ const ManageRequests = () => {
           ): <span className={`btn btn-sm ${request.applicationreview ==="Accepted"? 'btn-success':'btn-danger'} mx-3 my-3`}>{request.applicationreview}</span> }
            
              </td>
-           <td><Link to={"/"+request.job_id} className="btn btn-sm btn-primary my-4" style={{wordWrap:"break-word",textAlign:"center",margin:"0px 6px 0px"}}>{request.jobPosition || "Job Details"}</Link></td>
+           <td><Link to={"/"+(request.jobSlug || request.job_id)} className="btn btn-sm btn-primary my-4" style={{wordWrap:"break-word",textAlign:"center",margin:"0px 6px 0px"}}>{request.jobPosition || "Job Details"}</Link></td>
            <td style={{wordWrap:"break-word",textAlign:"center",margin:"2px 2px",padding:"5px 5px"}}>{request.userName}</td>
            <td style={{wordWrap:"break-word",textAlign:"center",margin:"2px 2px",padding:"5px 5px"}}>{request.userEmail}</td>
            <td style={{wordWrap:"break-word",textAlign:"center",margin:"2px 2px",padding:"5px 5px"}}>{request.userPhone}</td>
