@@ -33,7 +33,7 @@ router.get("",admin, async (req, res)=>{
        "select q.id, q.user_id, q.job_id, q.description, q.applicationreview, q.date, " +
        "q.cv_filename, q.cv_size, " +
        "u.name as userName, u.email as userEmail, u.phone as userPhone, " +
-       "j.position as jobPosition " +
+       "j.position as jobPosition, j.slug as jobSlug " +
        "from qualifications q " +
        "join users u on u.id = q.user_id " +
        "join jobs j on j.id = q.job_id " +

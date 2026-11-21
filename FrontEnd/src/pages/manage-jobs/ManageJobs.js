@@ -142,7 +142,7 @@ const ManageJobs = () => {
                         <td className="description-cell">{job.description}</td>
                         <td>{job.maxcandidate}</td>
                         <td className="actions-cell">
-                          <Link to={"/" + job.id} className="btn btn-info action-btn">
+                          <Link to={"/" + (job.slug || job.id)} className="btn btn-info action-btn">
                             <FaEye />
                           </Link>
                           <Link to={"/manage-jobs/" + job.id} className="btn btn-primary action-btn">

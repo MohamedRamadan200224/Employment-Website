@@ -23,7 +23,7 @@ export const routes = createBrowserRouter(
        { path:"/",
        element:<Home />,
        },
-       { path:":id",
+       { path:":slug",
        element:<JobDetails />,
        },
        
